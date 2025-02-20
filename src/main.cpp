@@ -42,7 +42,7 @@ string title = R"(
 
 void Model::Algorithm()
 {
-  visTMP(999);
+  // visTMP(999);
   // number of steps between two writes
   const unsigned streak_length = nsubsteps*ninfo;
 
@@ -57,7 +57,7 @@ void Model::Algorithm()
       try
       {
         WriteFrame(t);
-        Write_COM(t);
+        // Write_COM(t);
         // Write_visData(t);
 		//Write_velocities(t);  
 		//Write_forces(t);  	
