@@ -31,7 +31,6 @@ void Model::Initialize()
   cout<<"box adjusted for BC == 4"<<endl;
   }
   
-  
   N = Size[0]*Size[1]*Size[2];
   sqrt_time_step = sqrt(time_step);
 
@@ -60,7 +59,13 @@ void Model::Initialize()
   field_polz.resize(N, 0.);   
   field_velx.resize(N, 0.);
   field_vely.resize(N, 0.);
-  field_velz.resize(N, 0.)
+  field_velz.resize(N, 0.);
+  field_sxx.resize(N,0.);
+  field_sxy.resize(N,0.);
+  field_sxz.resize(N,0.);
+  field_syy.resize(N,0.);
+  field_syz.resize(N,0.);
+  field_szz.resize(N,0.);
   
   /*
   sumS00.resize(N, 0.);
@@ -76,8 +81,6 @@ void Model::Initialize()
   fourthp.resize(N, 0.);
   cIds.resize(N,0.);
   */
-  
-;
 
   // allocate memory for individual cells
   SetCellNumber(nphases);
@@ -131,11 +134,8 @@ void Model::SetCellNumber(unsigned new_nphases)
   patch_max.resize(nphases, Size);
   com.resize(nphases, {0., 0., 0.});
   com_prev.resize(nphases, {0., 0., 0.});
-  
-  /** ATTENTION NEEDED HERE **/
   polarization.resize(nphases, {0., 0., 0.});
   vorticity.resize(nphases,{0.,0.,0.});
-  
   velocity.resize(nphases, {0., 0., 0.});
   Fpressure.resize(nphases, {0., 0., 0.});
   Fshape.resize(nphases, {0., 0., 0.});
@@ -144,7 +144,17 @@ void Model::SetCellNumber(unsigned new_nphases)
   com_x.resize(nphases, 0.);
   com_y.resize(nphases, 0.);
   com_z.resize(nphases, 0.);
-  
+  cSxx.resize(nphases,0.);
+  cSxy.resize(nphases,0.);
+  cSxz.resize(nphases,0.);
+  cSyy.resize(nphases,0.);
+  cSyz.resize(nphases,0.);
+  cSzz.resize(nphases,0.);
+  offset.resize(nphases, {0u, 0u, 0u});
+  theta_pol.resize(nphases, 0.);
+  theta_pol_old.resize(nphases, 0.);
+  delta_theta_pol.resize(nphases, 0.);
+  //theta_nem.resize(nphases, 0.);
   /*
   alphas.resize(nphases,0.);
   zetaS_field.resize(nphases,0.);
@@ -169,12 +179,6 @@ void Model::SetCellNumber(unsigned new_nphases)
   Q00.resize(nphases, 0.);
   Q01.resize(nphases, 0.);
   */
-  
-  offset.resize(nphases, {0u, 0u, 0u});
-  theta_pol.resize(nphases, 0.);
-  theta_pol_old.resize(nphases, 0.);
-  delta_theta_pol.resize(nphases, 0.);
-  //theta_nem.resize(nphases, 0.);
   //theta_nem_old.resize(nphases, 0.);
   //tau.resize(nphases, 0.);
 }

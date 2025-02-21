@@ -124,6 +124,7 @@ void cuUpdateSumsAtNode(	   double *phi,
     	const auto k = dpos[1] + Size[1]*dpos[0] + Size[0]*Size[1]*dpos[2];
 	double p = phi[m];
 
+	/*
 	atomicAdd(&sum_one[k],p);
 	atomicAdd(&sum_two[k],p*p);
 	atomicAdd(&field_polx[k],p*polarization[n][0]);
@@ -132,6 +133,15 @@ void cuUpdateSumsAtNode(	   double *phi,
 	atomicAdd(&field_velx[k],p*velocity[n][0]);
 	atomicAdd(&field_vely[k],p*velocity[n][1]);
 	atomicAdd(&field_velz[k],p*velocity[n][2]);
+	*/
+	sum_one[k] += p;
+	sum_two[k] += p*p;
+	field_polx[k] += p*polarization[n][0];
+	field_poly[k] += p*polarization[n][1];
+	field_polz[k] += p*polarization[n][2];
+	field_velx[k] += p*velocity[n][0];
+	field_vely[k] += p*velocity[n][1];
+	field_velz[k] += p*velocity[n][2];
 	
 	
 }
@@ -165,7 +175,17 @@ void cuUpdatePotAtNode(stencil *neighbors,
 				  double omega_cs,
 				  double kappa_cs,
 				  int n_total,
-				  unsigned patch_N)		  
+				  unsigned patch_N,
+				  double *field_sxx,
+				  double *field_sxy,
+				  double *field_sxz,
+				  double *field_syy,
+				  double *field_syz,
+				  double *field_szz,
+				  double xi,
+				  double *field_velx,
+				  double *field_vely,
+				  double *field_velz)
 {
 
 	// build indices with cuda!!
@@ -204,8 +224,57 @@ void cuUpdatePotAtNode(stencil *neighbors,
 	// delta F / delta phi_i
 	V[m] = internal + interactions;
 	// pressure
-	atomicAdd(&field_press[k],p*interactions);
+	// atomicAdd(&field_press[k],p*interactions);
+	field_press[k] += p*interactions;
 	
+	// -----------------------------------------------------------------------------
+	// compute stress field 
+	// -----------------------------------------------------------------------------
+	
+	// const int nsite = 2;
+	double factor = 8;
+	int nvx = Size[0]-1;
+	int nvy = Size[1]-1;
+	int nvz = Size[2]-1;
+       double cx = (k/Size[1])%Size[0] + 0.5;
+       double cy = k%Size[1] + 0.5;
+       double cz = k/(Size[0]*Size[1]) + 0.5;
+       // Loop over the 2×2×2 integration points (unrolled for clarity)
+       for (int dz = 0; dz < 2; dz++) {
+       	for (int dy = 0; dy < 2; dy++) {
+              	for (int dx = 0; dx < 2; dx++) {
+              		double ix = (cx-0.5)+dx;
+              		double iy = (cy-0.5)+dy;
+              		double iz = (cz-0.5)+dz;
+              		double diff_x = cx - ix;
+              		double diff_y = cy - iy;
+              		double diff_z = cz - iz;
+              		double norm = sqrt(diff_x*diff_x+diff_y*diff_y+diff_z*diff_z);
+              		if (norm == 0) norm = 1;
+              		double ux = diff_x / norm;
+              		double uy = diff_y / norm;
+              		double uz = diff_z / norm;
+              		int idx = iy + Size[1]*ix + Size[0]*Size[1]*iz;
+              		field_sxx[k] += ux*xi*field_velx[idx];
+              		field_sxy[k] += ux*xi*field_vely[idx];
+              		field_sxy[k] += uy*xi*field_velx[idx];
+              		field_sxz[k] += ux*xi*field_velz[idx];
+              		field_sxz[k] += uz*xi*field_velx[idx];
+              		field_syy[k] += uy*xi*field_vely[idx];
+              		field_syz[k] += uy*xi*field_velz[idx];
+              		field_syz[k] += uz*xi*field_vely[idx];
+              		field_szz[k] += uz*xi*field_velz[idx];
+              	}
+              }
+       }
+       field_sxx[k] /= factor;
+       field_sxy[k] /= (2.*factor);
+       field_sxz[k] /= (2.*factor);
+       field_syy[k] /= factor;
+       field_syz[k] /= (2.*factor);
+       field_szz[k] /= factor;
+       
+
 	if (q==0){
     	Fpol[n] = Fpressure[n] = vorticity[n] = {0, 0, 0};//add fnem[n],fshape[n] --> 		  cell_fpressure[n],cell_pol[n],cell_delta_theta_pol
     	delta_theta_pol[n] = 0;// add tau[n]
@@ -241,7 +310,19 @@ void cuUpdatePhysicalFieldsAtNode( stencil *neighbors,
 					  	coord Size,
 					  	coord *offset,
 					  	int n_total,
-					  	unsigned patch_N)
+					  	unsigned patch_N,
+						double *field_sxx,
+						double *field_sxy,
+						double *field_sxz,
+						double *field_syy,
+						double *field_syz,
+						double *field_szz,
+						double *cSxx,
+						double *cSxy,
+						double *cSxz,
+						double *cSyy,
+						double *cSyz,
+						double *cSzz)		  	
 {
 
 	// build indices with cuda!!
@@ -282,7 +363,14 @@ void cuUpdatePhysicalFieldsAtNode( stencil *neighbors,
 	atomicAdd(&Fpressure[n][2],fpressure[2]);//-->Fpressure[n]
 	//atomicAdd(&cell_fshape,fshape);
 	//atomicAdd(&cell_fnem,fnem);
-		      
+	
+	atomicAdd(&cSxx[n],field_sxx[k]);
+	atomicAdd(&cSxy[n],field_sxy[k]);
+	atomicAdd(&cSxz[n],field_sxz[k]);
+	atomicAdd(&cSyy[n],field_syy[k]);
+	atomicAdd(&cSyz[n],field_syz[k]);
+	atomicAdd(&cSzz[n],field_szz[k]);
+	
 	// store derivatives
 	phi_dx[m] = dx;
 	phi_dy[m] = dy;
@@ -363,7 +451,7 @@ void cuUpdatePolVel(
 	const int m = blockIdx.x * blockDim.x + threadIdx.x;
 	if(m >= n_total) return;
 	Fpol[m]     = alpha * polarization[m];
-	velocity[m] = (Fpressure[m] + Fpol[m]) / xi; 
+	velocity[m] = (Fpressure[m] + Fpol[m]) / xi; //add nematic+shape...
 }
 
 __global__
@@ -413,7 +501,12 @@ void cuUpdatePhaseFieldAtNode(	double *phi,
 					  	double Jpol,
 					  	unsigned N,
 					  	curandState *rand_states,
-					  	bool store,int cuCheck)
+					  	bool store)
+					  	/*
+					  	double *field_polx,
+						double *field_poly,
+						double *field_polz)
+						*/
 {
 
 	
@@ -428,14 +521,6 @@ void cuUpdatePhaseFieldAtNode(	double *phi,
     	const auto k = dpos[1] + Size[1]*dpos[0] + Size[0]*Size[1]*dpos[2];
 	double p = phi[m];
 
-	/*
-	if (q==0){
-	// tau[n]     /= lambda;
-	Fpol[n]     = alpha*polarization[n];
-	velocity[n] = ( Fpressure[n] + Fpol[n] )/xi;// add Fnem[n] + Fshape[n]
-    	}
-    	*/
-  
   dphi[m] =
     - V[m]
     - velocity[n][0]*phi_dx[m] - velocity[n][1]*phi_dy[m] - velocity[n][2]*phi_dz[m];
@@ -477,6 +562,12 @@ void cuUpdatePhaseFieldAtNode(	double *phi,
   field_velx[k] = 0;
   field_vely[k] = 0;
   field_velz[k] = 0;
+  /*
+  field_polx[k] = 0;
+  field_poly[k] = 0;
+  field_polz[k] = 0;
+  */
+  
   
 }
 
@@ -668,7 +759,9 @@ void cuUpdateAtCell(			  	cuDoubleComplex *com_x,
 	if(displacement[0]==Size[0]-1u) displacement[0] = patch_size[0]-1u;
 	if(displacement[1]==Size[1]-1u) displacement[1] = patch_size[1]-1u;
 	if(displacement[2]==Size[2]-1u) displacement[2] = patch_size[2]-1u;  
-	// update offset and patch location
+	// -----------------------------------------------------------------------------
+	// Update offset and patch location(n)
+	// -----------------------------------------------------------------------------
 	offset[m]    = ( offset[m] + patch_size - displacement ) % patch_size;
 	patch_min[m] = new_min;
 	patch_max[m] = new_max;
@@ -700,9 +793,9 @@ __host__ void Model::Update(bool store, unsigned start)
                              		      patch_N,
                              		      n_total,
                              		      patch_size,
-				                d_patch_min,
-				                Size,
-				                d_offset);
+				                    d_patch_min,
+				                    Size,
+				                    d_offset);
 
     err = cudaGetLastError();
     if (err != cudaSuccess) {
@@ -738,8 +831,17 @@ __host__ void Model::Update(bool store, unsigned start)
                              omega_cs,
                              kappa_cs,
                              n_total,
-                             patch_N);
-                             
+                             patch_N,
+				 d_field_sxx,
+				 d_field_sxy,
+				 d_field_sxz,
+				 d_field_syy,
+				 d_field_syz,
+				 d_field_szz,
+				 xi,
+				 d_field_velx,
+				 d_field_vely,
+				 d_field_velz);
 
     err = cudaGetLastError();
     if (err != cudaSuccess) {
@@ -776,7 +878,20 @@ __host__ void Model::Update(bool store, unsigned start)
                                      Size,
                                      d_offset,
                                      n_total,
-                                     patch_N);
+                                     patch_N,
+					  d_field_sxx,
+					  d_field_sxy,
+					  d_field_sxz,
+					  d_field_syy,
+					  d_field_syz,
+					  d_field_szz,
+					  d_cSxx,
+					  d_cSxy,
+					  d_cSxz,
+					  d_cSyy,
+					  d_cSyz,
+					  d_cSzz);
+					  	
 
     err = cudaGetLastError();
     if (err != cudaSuccess) {
@@ -866,7 +981,12 @@ __host__ void Model::Update(bool store, unsigned start)
                                  Jpol,
                                  N,
                                  d_rand_states,
-                                 store,cuCheck);
+                                 store);
+                                 /*
+                                 d_field_polx,
+                                 d_field_poly,
+                                 d_field_polz);
+                                 */
 
     err = cudaGetLastError();
     if (err != cudaSuccess) {

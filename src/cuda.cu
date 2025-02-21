@@ -63,7 +63,7 @@ static void seed_rand(curandState *state, unsigned long seed)
 
 void Model::_manage_device_memory(ManageMemory which)
 {
-    malloc_or_free(d_phi, nphases * patch_N, which);       // allocate phi for each phase
+    malloc_or_free(d_phi, nphases * patch_N, which);       
     malloc_or_free(d_phi_old, nphases * patch_N, which);
     malloc_or_free(d_V, nphases * patch_N, which);
     malloc_or_free(d_phi_dx, nphases * patch_N, which);
@@ -81,6 +81,14 @@ void Model::_manage_device_memory(ManageMemory which)
     malloc_or_free(d_field_velx, N, which);
     malloc_or_free(d_field_vely, N, which);
     malloc_or_free(d_field_velz, N, which);
+    
+    malloc_or_free(d_field_sxx, N, which);
+    malloc_or_free(d_field_sxy, N, which);
+    malloc_or_free(d_field_sxz, N, which);
+    malloc_or_free(d_field_syy, N, which);
+    malloc_or_free(d_field_syz, N, which);
+    malloc_or_free(d_field_szz, N, which);
+    
     malloc_or_free(d_neighbors, N, which);
     malloc_or_free(d_walls, N, which);
     malloc_or_free(d_walls_dx, N, which);
@@ -95,6 +103,14 @@ void Model::_manage_device_memory(ManageMemory which)
     malloc_or_free(d_offset, nphases, which);
     malloc_or_free(d_vol, nphases, which);
     malloc_or_free(d_Fpol, nphases, which);
+    
+    malloc_or_free(d_cSxx, nphases, which);
+    malloc_or_free(d_cSxy, nphases, which);
+    malloc_or_free(d_cSxz, nphases, which);
+    malloc_or_free(d_cSyy, nphases, which);
+    malloc_or_free(d_cSyz, nphases, which);
+    malloc_or_free(d_cSzz, nphases, which);
+    
     malloc_or_free(d_Fpressure, nphases, which);
     malloc_or_free(d_vorticity, nphases, which);
     malloc_or_free(d_delta_theta_pol, nphases, which);
@@ -124,6 +140,14 @@ void Model::_copy_device_memory(CopyMemory dir)
     bidirectional_memcpy(d_field_velx, &field_velx[0], N, dir);
     bidirectional_memcpy(d_field_vely, &field_vely[0], N, dir);
     bidirectional_memcpy(d_field_velz, &field_velz[0], N, dir);
+    
+    bidirectional_memcpy(d_field_sxx, &field_sxx[0], N, dir);
+    bidirectional_memcpy(d_field_sxy, &field_sxy[0], N, dir); 
+    bidirectional_memcpy(d_field_sxz, &field_sxz[0], N, dir);
+    bidirectional_memcpy(d_field_syy, &field_syy[0], N, dir);
+    bidirectional_memcpy(d_field_syz, &field_syz[0], N, dir);
+    bidirectional_memcpy(d_field_szz, &field_szz[0], N, dir);
+    
     bidirectional_memcpy(d_field_press, &field_press[0], N, dir);
     bidirectional_memcpy(d_neighbors, &neighbors[0], N, dir);
     bidirectional_memcpy(d_walls, &walls[0], N, dir);

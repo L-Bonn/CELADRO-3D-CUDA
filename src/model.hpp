@@ -57,7 +57,6 @@ struct Model
   std::vector<field> phi, phi_dx, phi_dy, phi_dz;
   /** Predicted phi in a PC^n step */
   std::vector<field> phi_old;
-
   /** V = delta F / delta phi */
   std::vector<field> V;
   /** Sum of phi at each node */
@@ -70,6 +69,8 @@ struct Model
   field walls, walls_dx, walls_dy, walls_dz, walls_laplace;
   /** Forces */
   std::vector<vec<double, 3>> Fpol, Fnem, Fshape, Fpressure;
+  /** cell stresses */
+  std::vector<double> cSxx,cSxy,cSxz,cSyy,cSyz,cSzz;
   /** Velocity */
   std::vector<vec<double, 3>> velocity;
   /** vol associated with a phase field */
@@ -90,6 +91,8 @@ struct Model
   std::vector<double> theta_pol, theta_pol_old;
   /** Center-of-mass */
   std::vector<vec<double, 3>> com, com_prev;
+  /** stress fields */
+  field field_sxx, field_sxy, field_sxz, field_syy, field_syz, field_szz;
   
   
   
@@ -434,7 +437,8 @@ struct Model
          *d_walls, *d_walls_laplace, *d_walls_dx, *d_walls_dy, *d_walls_dz, *d_vol,
          *d_theta, *d_sum_one, *d_sum_two,*d_field_velx, *d_field_vely, *d_field_velz, 
          *d_field_polx, *d_field_poly, *d_field_polz, *d_field_press, *d_delta_theta_pol,
-         *d_theta_pol, *d_theta_pol_old;
+         *d_theta_pol, *d_theta_pol_old, *d_field_sxx, *d_field_sxy, *d_field_sxz, *d_field_syy,
+         *d_field_syz, *d_field_szz, *d_cSxx, *d_cSxy, *d_cSxz, *d_cSyy, *d_cSyz, *d_cSzz;
   vec<double, 3>  *d_polarization, *d_velocity, *d_Fpol, *d_Fpressure, *d_vorticity, *d_com;
   stencil         *d_neighbors, *d_neighbors_patch;
   coord           *d_patch_min, *d_patch_max, *d_offset;
@@ -620,14 +624,22 @@ struct Model
   {
     ar & auto_name(nphases)
        & auto_name(phi)
+       & auto_name(field_sxx)
+       & auto_name(field_syy)
+       & auto_name(field_szz)
+       & auto_name(field_sxy)
+       & auto_name(field_sxz)
+       & auto_name(field_syz)
+       & auto_name(cSxx)
+       & auto_name(cSxy)
+       & auto_name(cSxz)
+       & auto_name(cSyy)
+       & auto_name(cSyz)
+       & auto_name(cSzz)
        & auto_name(offset)
        & auto_name(com)
-       & auto_name(vol)
        & auto_name(velocity)
-       & auto_name(vorticity)
        & auto_name(Fpol)
-       & auto_name(Fnem)
-       & auto_name(Fshape)
        & auto_name(Fpressure)
        & auto_name(theta_pol)
        & auto_name(patch_min)

@@ -30,7 +30,7 @@
 
     // Typical maximum number of threads per block on most NVIDIA GPUs
     #ifndef ThreadsPerBlock
-    #define ThreadsPerBlock 1024
+    #define ThreadsPerBlock 512
     #endif
 
     // CUDA_host_device: used for functions callable from both host and device
