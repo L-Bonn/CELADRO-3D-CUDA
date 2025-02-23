@@ -1,6 +1,5 @@
 /*
  * This file is part of CELADRO-3D-CUDA, Copyright (C) 2024, Siavash Monfared
- *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -55,7 +54,7 @@ void Model::Pre()
     if(relax_nsubsteps) swap(nsubsteps, relax_nsubsteps);
 
     for(unsigned i=0; i<relax_time*nsubsteps; ++i)
-      for(unsigned j=0; j<=npc; ++i) Update(i==0);
+      for(unsigned j=0; j<=npc; ++j) Update(0,j==0);
 
     if(relax_nsubsteps) swap(nsubsteps, relax_nsubsteps);
 
@@ -770,9 +769,22 @@ void cuUpdateAtCell(			  	cuDoubleComplex *com_x,
     
 
 
-__host__ void Model::Update(bool store, unsigned start)
+__host__ void Model::Update(bool store, unsigned t)
 {
-	
+    /*
+    n_total   = static_cast<int>(nphases_index.size());
+    n_blocks  = (n_total + ThreadsPerBlock - 1) / ThreadsPerBlock;
+    n_threads = ThreadsPerBlock;
+    
+    nph_total   = static_cast<int>(nphases_index.size());
+    nph_blocks  = (nph_total + ThreadsPerBlock - 1) / ThreadsPerBlock;
+    nph_threads = ThreadsPerBlock;
+    */
+
+    nph_total   = static_cast<int>(nphases);
+    nph_blocks  = (nph_total + ThreadsPerBlock - 1) / ThreadsPerBlock;
+    nph_threads = ThreadsPerBlock;
+    
     cudaError_t err = cudaGetLastError();
     if (err != cudaSuccess) {
         std::cerr << "model launch error: " << cudaGetErrorString(err) << std::endl;
@@ -899,26 +911,7 @@ __host__ void Model::Update(bool store, unsigned start)
         exit(-1);
     }
     cudaDeviceSynchronize();
-    /*
-    cuUpdatePolVel<<<n_blocks, n_threads>>>(
-		    alpha,
-		    xi,
-		    d_Fpressure,
-		    d_Fpol,
-		    d_velocity,
-		    d_polarization,
-		    patch_size,
-		    d_patch_min,
-		    Size,
-		    d_offset,
-		    n_total,
-		    patch_N
-    );
-    */
-    
-    nph_total   = static_cast<int>(nphases);
-    nph_blocks  = (nph_total + ThreadsPerBlock - 1) / ThreadsPerBlock;
-    nph_threads = ThreadsPerBlock;
+
     cuUpdatePolVel<<<nph_blocks, nph_threads>>>(
 		    alpha,
 		    xi,
@@ -994,60 +987,7 @@ __host__ void Model::Update(bool store, unsigned start)
         exit(-1);
     }
     cudaDeviceSynchronize();
-    
-    /*
-    cuUpdateAtCell<<<n_blocks, n_threads>>>(d_phi,
-                                 d_phi_dx,
-                                 d_phi_dy,
-                                 d_phi_dz,
-                                 d_dphi,
-                                 d_dphi_old,
-                                 d_phi_old,
-                                 d_sum_one,
-                                 d_sum_two,
-                                 d_field_press,
-                                 d_field_velx,
-                                 d_field_vely,
-                                 d_field_velz,
-                                 d_vol,
-                                 d_V,
-                                 d_com_x,
-                                 d_com_y,
-                                 d_com_z,
-                                 d_theta_pol,
-                                 d_theta_pol_old,
-                                 time_step,
-                                 d_com_x_table,
-                                 d_com_y_table,
-                                 d_com_z_table,
-                                 alpha,
-                                 xi,
-                                 d_Fpressure,
-                                 d_Fpol,
-                                 d_velocity,
-                                 d_polarization,
-                                 d_com,
-                                 d_delta_theta_pol,
-                                 patch_size,
-                                 d_patch_min,
-                                 d_patch_max,
-                                 patch_margin,
-                                 Size,
-                                 d_offset,
-                                 n_total,
-                                 patch_N,
-                                 Spol,
-                                 Dpol,
-                                 Kpol,
-                                 Jpol,
-                                 N,
-                                 d_rand_states,
-                                 store,cuCheck);
-    */
-
-	    nph_total   = static_cast<int>(nphases);
-	    nph_blocks  = (nph_total + ThreadsPerBlock - 1) / ThreadsPerBlock;
-	    nph_threads = ThreadsPerBlock;			  			  	
+		  			  	
            cuUpdateAtCell<<<nph_blocks, nph_threads>>>(
                                  d_com_x,
                                  d_com_y,
@@ -1085,6 +1025,10 @@ __host__ void Model::Update(bool store, unsigned start)
         exit(-1);
     }
     cudaDeviceSynchronize();
+    
+    /*
+    proliferate(t);
+    */
     
 }
 

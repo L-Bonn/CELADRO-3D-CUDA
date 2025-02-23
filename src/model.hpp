@@ -1,6 +1,5 @@
 /*
  * This file is part of CELADRO-3D-CUDA, Copyright (C) 2024, Siavash Monfared
- *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -14,7 +13,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
  
 #ifndef MODEL_HPP_
 #define MODEL_HPP_
@@ -93,8 +91,7 @@ struct Model
   std::vector<vec<double, 3>> com, com_prev;
   /** stress fields */
   field field_sxx, field_sxy, field_sxz, field_syy, field_syz, field_szz;
-  
-  
+
   
   
   
@@ -274,6 +271,26 @@ struct Model
   double Dpol = 0, Dnem = 0;
   double vimp = (4./3.)*Pi*R*R*R;
   int cuCheck = 0;
+  
+  // ===========================================================================
+  // related to proliferation 
+  /*
+  std::vector<unsigned> nphases_index;
+  int tau_divide = 0;
+  bool proliferate_bool = True;
+  unsigned prolif_start;
+  unsigned prolif_freq;
+  unsinged nphases_init;
+  unsinged nphases_max;
+  unsigned nphases_index_head = nphases_init - 1;
+  void proliferate(unsigned);
+  void initDivision(unsigned n, unsigned i);
+  void BirthCellMemories(unsigned new_nphases);
+  void DivideCell(unsigned n, unsigned nphases_current);
+  void BirthCell(unsigned n, const coord& center);
+  void ComputeBirthCellCOM(unsigned n, unsigned nbirth);
+  void KillCell(unsigned n, unsigned i);
+  */
 				  
   // ===========================================================================
   // Options. Implemented in options.cpp
@@ -438,7 +455,7 @@ struct Model
          *d_theta, *d_sum_one, *d_sum_two,*d_field_velx, *d_field_vely, *d_field_velz, 
          *d_field_polx, *d_field_poly, *d_field_polz, *d_field_press, *d_delta_theta_pol,
          *d_theta_pol, *d_theta_pol_old, *d_field_sxx, *d_field_sxy, *d_field_sxz, *d_field_syy,
-         *d_field_syz, *d_field_szz, *d_cSxx, *d_cSxy, *d_cSxz, *d_cSyy, *d_cSyz, *d_cSzz;
+         *d_field_syz, *d_field_szz, *d_cSxx, *d_cSxy, *d_cSxz, *d_cSyy, *d_cSyz, *d_cSzz, d_nphases_index;
   vec<double, 3>  *d_polarization, *d_velocity, *d_Fpol, *d_Fpressure, *d_vorticity, *d_com;
   stencil         *d_neighbors, *d_neighbors_patch;
   coord           *d_patch_min, *d_patch_max, *d_offset;
@@ -576,7 +593,7 @@ struct Model
    * The boolean argument is used to differentiate between the predictor step
    * (true) and subsequent corrector steps.
    * */
-  void Update(bool, unsigned=0);
+  void Update(bool, unsigned t);
 
   // ===========================================================================
   // Serialization

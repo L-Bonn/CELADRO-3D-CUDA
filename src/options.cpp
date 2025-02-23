@@ -1,6 +1,5 @@
 /*
- * This file is part of CELADRO_3D, Copyright (C) 2019-2021, Siavash Monfared
- *
+ * This file is part of CELADRO-3D-CUDA, Copyright (C) 2024, Siavash Monfared
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -86,7 +85,7 @@ void Model::ParseProgramOptions(int ac, char **av)
     ("ninfo", opt::value<unsigned>(&ninfo),
      "save frame every so many steps")
     ("nphases", opt::value<unsigned>(&nphases),
-      "Number of phases")
+      "Number of phases")// need to remove for prolif and init with nphases_init
     ("gamma", opt::value<double>(&gam),
       "Elastic constant of each phase (array)")
     ("mu", opt::value<double>(&mu),
@@ -95,6 +94,18 @@ void Model::ParseProgramOptions(int ac, char **av)
       "Interface thickness parameter")
     ("kappa_cc", opt::value<double>(&kappa_cc),
       "Interaction strength")
+    /*
+    ("nphases_init", opt::value<double>(&nphases_init),
+      "initial number of cells")
+    ("nphases_max", opt::value<double>(&nphases_max),
+      "maximum number of cells")
+    ("prolif_start", opt::value<double>(&prolif_start),
+      "start timestep for proliferation")
+    ("prolif_freq", opt::value<double>(&prolif_freq),
+      "frequency of proliferation")
+    ("proliferate", opt::value<bool>(&proliferate_bool)->default_value(true),
+    "Enable cell proliferation (true or false)")
+    */
     ("npc", opt::value<unsigned>(&npc)->default_value(1u),
       "Number of predictor-corrector steps")
     ("margin", opt::value<unsigned>(&margin)->default_value(0u),

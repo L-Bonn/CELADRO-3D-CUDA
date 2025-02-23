@@ -1,6 +1,5 @@
 /*
  * This file is part of CELADRO-3D-CUDA, Copyright (C) 2024, Siavash Monfared
- *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -109,8 +108,10 @@ void Model::_manage_device_memory(ManageMemory which)
     malloc_or_free(d_cSxz, nphases, which);
     malloc_or_free(d_cSyy, nphases, which);
     malloc_or_free(d_cSyz, nphases, which);
+    /*
+    malloc_or_free(d_nphases_index, nphases, which);
+    */
     malloc_or_free(d_cSzz, nphases, which);
-    
     malloc_or_free(d_Fpressure, nphases, which);
     malloc_or_free(d_vorticity, nphases, which);
     malloc_or_free(d_delta_theta_pol, nphases, which);
@@ -171,6 +172,9 @@ void Model::_copy_device_memory(CopyMemory dir)
     bidirectional_memcpy(d_com_x, &com_x[0], nphases, dir);
     bidirectional_memcpy(d_com_y, &com_y[0], nphases, dir);
     bidirectional_memcpy(d_com_z, &com_z[0], nphases, dir);
+    /*
+    bidirectional_memcpy(d_nphases_index, &nphases_index[0], nphases, dir);
+    */
     
     bidirectional_memcpy(d_neighbors_patch, &neighbors_patch[0], patch_N, dir);
 
@@ -253,6 +257,20 @@ void Model::visTMP(unsigned t){
     fclose(sortie);
      
 }
+
+/*
+void Model::proliferate(unsigned t){
+if(proliferate_bool and t > prolif_start and remainder(tau_divide*1.,prolif_freq)==0. and nphases_index.size()*1. < nphases_max){
+GetFromDevice();
+int imax = nphases_index.size() - 1;
+unsigned i = random_int_uniform(0,imax);
+initDivision(n,i);
+PutToDevice();
+tau_divide = 0;
+}
+tau_divide = tau_divide + 1;
+}
+*/
 
 
 void Model::AllocDeviceMemory()

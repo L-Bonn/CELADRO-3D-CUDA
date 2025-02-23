@@ -1,6 +1,5 @@
 /*
  * This file is part of CELADRO-3D-CUDA, Copyright (C) 2024, Siavash Monfared
- *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -24,6 +23,12 @@ using namespace std;
 
 void Model::Initialize()
 {
+
+  /*
+  for(unsigned k = 0 ; k < nphases ; k++){
+  nphases_index.push_back(k);
+  }
+  */
 
   if (BC == 4){
   Size[0] = Size[0] + 4.*wall_thickness;
