@@ -138,7 +138,7 @@ void Model::Configure()
     string fname = "input_str.dat";
     double xcoor, ycoor, zcoor;
     fstream file(fname);
-    for (unsigned n = 0 ; n < nphases ; n++){
+    for (unsigned n = 0 ; n < nphases_init ; n++){
     file >> xcoor >> ycoor >> zcoor;
       // xc,yc,zcoor,zetas1,zetaQ,gam1,omega,omega_wall,kappa,mu,alpha,xi,R
      AddCellMix(n,{xcoor,ycoor,zcoor},zetaS,zetaQ,gam,omega_cc,omega_cs,kappa_cc,mu,alpha,xi,R,1);

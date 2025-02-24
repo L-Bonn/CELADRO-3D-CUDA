@@ -273,6 +273,30 @@ src/options.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/celadro.dir/build.make CMakeFiles/celadro.dir/src/options.cpp.s
 .PHONY : src/options.cpp.s
 
+src/proliferate.o: src/proliferate.cpp.o
+.PHONY : src/proliferate.o
+
+# target to build an object file
+src/proliferate.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/celadro.dir/build.make CMakeFiles/celadro.dir/src/proliferate.cpp.o
+.PHONY : src/proliferate.cpp.o
+
+src/proliferate.i: src/proliferate.cpp.i
+.PHONY : src/proliferate.i
+
+# target to preprocess a source file
+src/proliferate.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/celadro.dir/build.make CMakeFiles/celadro.dir/src/proliferate.cpp.i
+.PHONY : src/proliferate.cpp.i
+
+src/proliferate.s: src/proliferate.cpp.s
+.PHONY : src/proliferate.s
+
+# target to generate assembly for a file
+src/proliferate.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/celadro.dir/build.make CMakeFiles/celadro.dir/src/proliferate.cpp.s
+.PHONY : src/proliferate.cpp.s
+
 src/random.o: src/random.cpp.o
 .PHONY : src/random.o
 
@@ -396,6 +420,9 @@ help:
 	@echo "... src/options.o"
 	@echo "... src/options.i"
 	@echo "... src/options.s"
+	@echo "... src/proliferate.o"
+	@echo "... src/proliferate.i"
+	@echo "... src/proliferate.s"
 	@echo "... src/random.o"
 	@echo "... src/random.i"
 	@echo "... src/random.s"

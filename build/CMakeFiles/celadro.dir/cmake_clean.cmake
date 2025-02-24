@@ -12,6 +12,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/celadro.dir/src/main.cpp.o.d"
   "CMakeFiles/celadro.dir/src/options.cpp.o"
   "CMakeFiles/celadro.dir/src/options.cpp.o.d"
+  "CMakeFiles/celadro.dir/src/proliferate.cpp.o"
+  "CMakeFiles/celadro.dir/src/proliferate.cpp.o.d"
   "CMakeFiles/celadro.dir/src/random.cpp.o"
   "CMakeFiles/celadro.dir/src/random.cpp.o.d"
   "CMakeFiles/celadro.dir/src/run.cu.o"

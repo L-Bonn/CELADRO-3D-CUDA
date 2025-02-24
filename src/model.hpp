@@ -30,6 +30,8 @@ using field = std::vector<double>;
 /** Grid coordinate */
 using coord = vec<unsigned, 3>;
 
+
+
 /** Model class
  *
  * This class contains the whole program and is mainly used to be able to
@@ -50,6 +52,19 @@ struct Model
    * same size). These variables are computed in Initialize() and do not change
    * at runtime.
    * */
+   
+/** In which direction do we copy data? */
+enum class CopyMemory {
+	HostToDevice,
+	DeviceToHost
+};
+
+/** Allocate or free memory? */
+enum class ManageMemory {
+	Allocate,
+	Free
+};
+
   std::vector<stencil> neighbors, neighbors_patch;
   /** Phase fields and derivatives */
   std::vector<field> phi, phi_dx, phi_dy, phi_dz;
@@ -274,23 +289,28 @@ struct Model
   
   // ===========================================================================
   // related to proliferation 
-  /*
+  
   std::vector<unsigned> nphases_index;
   int tau_divide = 0;
-  bool proliferate_bool = True;
-  unsigned prolif_start;
-  unsigned prolif_freq;
-  unsinged nphases_init;
-  unsinged nphases_max;
-  unsigned nphases_index_head = nphases_init - 1;
+  bool proliferate_bool = true;
+  unsigned prolif_start = 2000;
+  unsigned prolif_freq = 2000;
+  unsigned nphases_init;
+  unsigned nphases_max = 1000;
+  unsigned nphases_index_head;
+
   void proliferate(unsigned);
   void initDivision(unsigned n, unsigned i);
   void BirthCellMemories(unsigned new_nphases);
   void DivideCell(unsigned n, unsigned nphases_current);
-  void BirthCell(unsigned n, const coord& center);
+  void BirthCell(unsigned n);
   void ComputeBirthCellCOM(unsigned n, unsigned nbirth);
   void KillCell(unsigned n, unsigned i);
-  */
+  void BirthCellAtNode(unsigned n, unsigned q);
+  void print_new_cell_props();
+  void AllocDeviceMemoryCellBirth();
+  void FreeDeviceMemoryCellBirth();
+  void _manage_device_memoryCellBirth(ManageMemory);
 				  
   // ===========================================================================
   // Options. Implemented in options.cpp
@@ -402,10 +422,11 @@ struct Model
   /** Pseudo random generator */
   std::mt19937 gen;
   //ranlux24 gen;
-
+  
   /** Return random real, uniform distribution */
   double random_real(double min=0., double max=1.);
-
+  /** Return random real, uniform distribution */
+  double random_uniform();
   /** Return random real, gaussian distributed */
   double random_normal(double sigma=1.);
 
@@ -420,6 +441,8 @@ struct Model
 
   /** Return random unsigned uniformly distributed */
   unsigned random_unsigned();
+  int random_int_uniform(int min, int max);
+
 
   /** Initialize random numbers
    *
@@ -455,7 +478,7 @@ struct Model
          *d_theta, *d_sum_one, *d_sum_two,*d_field_velx, *d_field_vely, *d_field_velz, 
          *d_field_polx, *d_field_poly, *d_field_polz, *d_field_press, *d_delta_theta_pol,
          *d_theta_pol, *d_theta_pol_old, *d_field_sxx, *d_field_sxy, *d_field_sxz, *d_field_syy,
-         *d_field_syz, *d_field_szz, *d_cSxx, *d_cSxy, *d_cSxz, *d_cSyy, *d_cSyz, *d_cSzz, d_nphases_index;
+         *d_field_syz, *d_field_szz, *d_cSxx, *d_cSxy, *d_cSxz, *d_cSyy, *d_cSyz, *d_cSzz;
   vec<double, 3>  *d_polarization, *d_velocity, *d_Fpol, *d_Fpressure, *d_vorticity, *d_com;
   stencil         *d_neighbors, *d_neighbors_patch;
   coord           *d_patch_min, *d_patch_max, *d_offset;
@@ -480,17 +503,7 @@ struct Model
   /** CUDA device memory managment
     * @{ */
 
-  /** In which direction do we copy data? */
-  enum class CopyMemory {
-    HostToDevice,
-    DeviceToHost
-  };
 
-  /** Allocate or free memory? */
-  enum class ManageMemory {
-    Allocate,
-    Free
-  };
 
   /** Implementation for AllocDeviceMemory() and FreeDeviceMemory() */
   void _manage_device_memory(ManageMemory);

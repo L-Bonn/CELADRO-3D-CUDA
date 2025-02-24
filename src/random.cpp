@@ -61,3 +61,14 @@ int Model::random_exponential(double lambda)
 {
   return exponential_distribution<>(lambda)(gen);
 }
+
+double Model::random_uniform()
+{
+
+  return uniform_real_distribution<>(0.0, 2.0 * M_PI)(gen);
+
+}
+
+int Model::random_int_uniform(int min, int max){
+return uniform_int_distribution<>(min, max)(gen);
+}

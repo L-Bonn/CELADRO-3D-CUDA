@@ -74,7 +74,8 @@ def writeVTK(fname, frame):
     p = np.zeros(N)
     p = np.reshape(p,(frame.parameters['Size'][2],frame.parameters['Size'][0],frame.parameters['Size'][1]))
     for i in range(len(frame.phi)):
-    	p += frame.phi[i]
+    	if (frame.com[i][2]-8) < 2. * 8:
+    		p += frame.phi[i]
 
     f = open(fname,"w+")
     f.write("# vtk DataFile Version 2.0\n");

@@ -84,8 +84,8 @@ void Model::ParseProgramOptions(int ac, char **av)
      "(effective time step is 1/nsubsteps)")
     ("ninfo", opt::value<unsigned>(&ninfo),
      "save frame every so many steps")
-    ("nphases", opt::value<unsigned>(&nphases),
-      "Number of phases")// need to remove for prolif and init with nphases_init
+    //("nphases", opt::value<unsigned>(&nphases),
+    //  "Number of phases")// need to remove for prolif and init with nphases_init
     ("gamma", opt::value<double>(&gam),
       "Elastic constant of each phase (array)")
     ("mu", opt::value<double>(&mu),
@@ -94,18 +94,16 @@ void Model::ParseProgramOptions(int ac, char **av)
       "Interface thickness parameter")
     ("kappa_cc", opt::value<double>(&kappa_cc),
       "Interaction strength")
-    /*
-    ("nphases_init", opt::value<double>(&nphases_init),
+    ("nphases_init", opt::value<unsigned>(&nphases_init),
       "initial number of cells")
-    ("nphases_max", opt::value<double>(&nphases_max),
+    ("nphases_max", opt::value<unsigned>(&nphases_max),
       "maximum number of cells")
-    ("prolif_start", opt::value<double>(&prolif_start),
+    ("prolif_start", opt::value<unsigned>(&prolif_start),
       "start timestep for proliferation")
-    ("prolif_freq", opt::value<double>(&prolif_freq),
+    ("prolif_freq", opt::value<unsigned>(&prolif_freq),
       "frequency of proliferation")
     ("proliferate", opt::value<bool>(&proliferate_bool)->default_value(true),
     "Enable cell proliferation (true or false)")
-    */
     ("npc", opt::value<unsigned>(&npc)->default_value(1u),
       "Number of predictor-corrector steps")
     ("margin", opt::value<unsigned>(&margin)->default_value(0u),
@@ -245,6 +243,9 @@ void Model::ParseProgramOptions(int ac, char **av)
 
   // compute effective time step
   time_step = 1./nsubsteps;
+  
+  nphases = nphases_init;
+  nphases_index_head = nphases-1;
 
   // set nstart to the next correct frame (round above)
   if(nstart%ninfo) nstart = (1u+nstart/ninfo)*ninfo;

@@ -24,11 +24,11 @@ using namespace std;
 void Model::Initialize()
 {
 
-  /*
-  for(unsigned k = 0 ; k < nphases ; k++){
+  
+  for(unsigned k = 0 ; k < nphases_init ; k++){
   nphases_index.push_back(k);
   }
-  */
+  
 
   if (BC == 4){
   Size[0] = Size[0] + 4.*wall_thickness;
@@ -88,7 +88,7 @@ void Model::Initialize()
   */
 
   // allocate memory for individual cells
-  SetCellNumber(nphases);
+  SetCellNumber(nphases_init);
   // ---------------------------------------------------------------------------
   if(zetaQ!=0.) sign_zetaQ = zetaQ>0. ? 1 : -1;
   if(zetaS!=0.) sign_zetaS = zetaS>0. ? 1 : -1;
@@ -104,7 +104,7 @@ void Model::Initialize()
   // ---------------------------------------------------------------------------
 
   // check parameters
-  for(unsigned n=0; n<nphases; ++n)
+  for(unsigned n=0; n<nphases_init; ++n)
     if(margin<R) throw error_msg("Margin is too small, make it bigger than R.");
 
   // check birth boundaries

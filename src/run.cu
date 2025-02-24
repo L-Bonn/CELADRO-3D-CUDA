@@ -100,7 +100,7 @@ void cuUpdateSumsAtNode(	   double *phi,
 				   vec<double,3> *polarization, 
 				   vec<double,3> *velocity,
 				   unsigned patch_N,
-				   int n_total,
+				   unsigned n_total,
 				   coord patch_size,
 				   coord *patch_min,
 				   coord Size,
@@ -115,7 +115,6 @@ void cuUpdateSumsAtNode(	   double *phi,
 	
 	const unsigned n = static_cast<unsigned>(m)/patch_N;
 	unsigned q = static_cast<unsigned>(m)%patch_N;
-
 	const coord qpos = { (q/patch_size[1])%patch_size[0] , q%patch_size[1]  , q/( patch_size[0]*patch_size[1] ) };
     	
     	const coord dpos = ( (qpos + offset[n])%patch_size + patch_min[n] )%Size;
@@ -173,7 +172,7 @@ void cuUpdatePotAtNode(stencil *neighbors,
 				  double omega_cc,
 				  double omega_cs,
 				  double kappa_cs,
-				  int n_total,
+				  unsigned n_total,
 				  unsigned patch_N,
 				  double *field_sxx,
 				  double *field_sxy,
@@ -275,7 +274,7 @@ void cuUpdatePotAtNode(stencil *neighbors,
        
 
 	if (q==0){
-    	Fpol[n] = Fpressure[n] = vorticity[n] = {0, 0, 0};//add fnem[n],fshape[n] --> 		  cell_fpressure[n],cell_pol[n],cell_delta_theta_pol
+    	Fpol[n] = Fpressure[n] = vorticity[n] = {0, 0, 0};//add fnem[n],fshape[n] 
     	delta_theta_pol[n] = 0;// add tau[n]
 	}
 	
@@ -308,7 +307,7 @@ void cuUpdatePhysicalFieldsAtNode( stencil *neighbors,
 					  	coord *patch_min,
 					  	coord Size,
 					  	coord *offset,
-					  	int n_total,
+					  	unsigned n_total,
 					  	unsigned patch_N,
 						double *field_sxx,
 						double *field_sxy,
@@ -327,6 +326,7 @@ void cuUpdatePhysicalFieldsAtNode( stencil *neighbors,
 	// build indices with cuda!!
 	const int m = blockIdx.x*blockDim.x + threadIdx.x;
 	if(m>=n_total) return;
+	
 	const unsigned n = static_cast<unsigned>(m)/patch_N;
 	unsigned q = static_cast<unsigned>(m)%patch_N;
 	const coord qpos = { (q/patch_size[1])%patch_size[0] , q%patch_size[1]  , q/( patch_size[0]*patch_size[1] ) };
@@ -400,42 +400,6 @@ void cuUpdatePhysicalFieldsAtNode( stencil *neighbors,
 
 }
 
-/*
-__global__
-void cuUpdatePolVel(
-    double alpha,
-    double xi,
-    vec<double,3> *Fpressure,
-    vec<double,3> *Fpol,
-    vec<double,3> *velocity,
-    vec<double,3> *polarization,
-    // Removed: double *delta_theta_pol,
-    coord patch_size,
-    coord *patch_min,
-    coord Size,
-    coord *offset,
-    int n_total,
-    unsigned patch_N)
-{
-    // Build indices with CUDA.
-    const int m = blockIdx.x * blockDim.x + threadIdx.x;
-    if(m >= n_total) return;
-    unsigned n = static_cast<unsigned>(m) / patch_N;
-    unsigned q = static_cast<unsigned>(m) % patch_N;
-    
-    const coord qpos = { (q / patch_size[1]) % patch_size[0],
-                         q % patch_size[1],
-                         q / (patch_size[0] * patch_size[1]) };
-    const coord dpos = ( (qpos + offset[n]) % patch_size + patch_min[n] ) % Size;
-    const auto k = dpos[1] + Size[1] * dpos[0] + Size[0] * Size[1] * dpos[2];
-
-    if(q == 0) {
-        // Update structure for the cell.
-        Fpol[n]     = alpha * polarization[n];
-        velocity[n] = (Fpressure[n] + Fpol[n]) / xi;  // add Fnem, Fshape if needed
-    }
-}
-*/
 
 __global__
 void cuUpdatePolVel(
@@ -445,10 +409,10 @@ void cuUpdatePolVel(
     vec<double,3> *Fpol,
     vec<double,3> *velocity,
     vec<double,3> *polarization,
-    int n_total)
+    unsigned nphases)
 {
 	const int m = blockIdx.x * blockDim.x + threadIdx.x;
-	if(m >= n_total) return;
+	if(m >= nphases) return;
 	Fpol[m]     = alpha * polarization[m];
 	velocity[m] = (Fpressure[m] + Fpol[m]) / xi; //add nematic+shape...
 }
@@ -492,7 +456,7 @@ void cuUpdatePhaseFieldAtNode(	double *phi,
 					  	coord patch_margin,
 					  	coord Size,
 					  	coord *offset,
-					  	int n_total,
+					  	unsigned n_total,
 					  	unsigned patch_N,
 					  	double Spol,
 					  	double Dpol,
@@ -570,119 +534,6 @@ void cuUpdatePhaseFieldAtNode(	double *phi,
   
 }
 
-/*
-__global__
-void cuUpdateAtCell(				double *phi, 
-					  	double *phi_dx,
-					  	double *phi_dy,
-					  	double *phi_dz,
-					  	double *dphi,
-					  	double *dphi_old,
-					  	double *phi_old,
-					  	double *sum_one, 
-					  	double *sum_two,
-					  	double *field_press,
-					  	double *field_velx,
-					  	double *field_vely,
-					  	double *field_velz,
-					  	double *vol,
-					  	double *V,
-					  	cuDoubleComplex *com_x,
-					  	cuDoubleComplex *com_y,
-					  	cuDoubleComplex *com_z,
-					  	double *theta_pol,
-					  	double *theta_pol_old,
-					  	double time_step,
-					  	cuDoubleComplex *com_x_table,
-					  	cuDoubleComplex *com_y_table,
-					  	cuDoubleComplex *com_z_table,
-					  	double alpha,
-					  	double xi,
-				  		vec<double,3> *Fpressure,
-				  		vec<double,3> *Fpol,
-				  		vec<double,3> *velocity,
-				  		vec<double,3> *polarization,
-				  		vec<double,3> *com,
-				  		double *delta_theta_pol,
-					  	coord patch_size,
-					  	coord *patch_min,
-					  	coord *patch_max,
-					  	coord patch_margin,
-					  	coord Size,
-					  	coord *offset,
-					  	int n_total,
-					  	unsigned patch_N,
-					  	double Spol,
-					  	double Dpol,
-					  	double Kpol,
-					  	double Jpol,
-					  	unsigned N,
-					  	curandState *rand_states,
-					  	bool store,int cuCheck)
-{
-
-	
-	// build indices with cuda!!
-	const int m = blockIdx.x*blockDim.x + threadIdx.x;
-	if(m>=n_total) return;
-	unsigned n = static_cast<unsigned>(m)/patch_N;
-	unsigned q = static_cast<unsigned>(m)%patch_N;
-	
-	const coord qpos = { (q/patch_size[1])%patch_size[0] , q%patch_size[1]  , q/( patch_size[0]*patch_size[1] ) };
-    	const coord dpos = ( (qpos + offset[n])%patch_size + patch_min[n] )%Size;
-    	const auto k = dpos[1] + Size[1]*dpos[0] + Size[0]*Size[1]*dpos[2];
-	double p = phi[m];
-
-  if(q==0){
-	// cuUpdateStructureTensorAtNode<<<blocksPerGrid, threadsPerBlock>>>(n);
-	// -----------------------------------------------------------------------------
-	// UpdatePolarization(n, store);
-	// -----------------------------------------------------------------------------
-	// euler-marijuana update
-	if(store){
-	theta_pol_old[n] = theta_pol[n] + sqrt(time_step)*Dpol*curand_normal(&rand_states[n]);
-	}
-	vec<double, 3> ff = {0, 0, 0};
-	ff = Fpressure[n];
-	theta_pol[n] = theta_pol_old[n] - time_step*(
-	+ Kpol*delta_theta_pol[n]
-	+ Jpol*ff.abs() * atan2( 
-	sqrt(pow( (ff[1]*polarization[n][0]-ff[0]*polarization[n][1]) ,2) + pow( (ff[2]*polarization[n][0]-ff[0]*polarization[n][2]) ,2) + pow( (ff[2]*polarization[n][1]-ff[1]*polarization[n][2]) ,2) ),
-	ff[0]*polarization[n][0]+ff[1]*polarization[n][1]+ff[2]*polarization[n][2]                               
-		               ));            
-	polarization[n] = { Spol*cos(theta_pol[n]), Spol*sin(theta_pol[n]) };
-	// -----------------------------------------------------------------------------
-	// UpdateNematic(n, store);
-	// -----------------------------------------------------------------------------
-	// -----------------------------------------------------------------------------
-	// ComputeCoM(n);
-	// -----------------------------------------------------------------------------
-	const auto mx = cuCarg(cuCdiv(com_x[n], make_cuDoubleComplex(static_cast<double>(N), 0.0))) + Pi;
-	const auto my = cuCarg(cuCdiv(com_y[n], make_cuDoubleComplex(static_cast<double>(N), 0.0))) + Pi;
-	const auto mz = cuCarg(cuCdiv(com_z[n], make_cuDoubleComplex(static_cast<double>(N), 0.0))) + Pi;
-	// printf("bef: %u %g %g %g %i\n",n,com[n][0],com[n][1],com[n][2],cuCheck);
-	// printf("%u %g %g %g\n",n,mx,my,mz);
-	com[n] = { mx/2./Pi*Size[0], my/2./Pi*Size[1] , mz/2./Pi*Size[2] };
-	// printf("aft: %u %g %g %g %i\n",n,com[n][0],com[n][1],com[n][2],cuCheck);
-	// -----------------------------------------------------------------------------
-	// UpdatePatch(n);
-	// -----------------------------------------------------------------------------
-	const coord com_grd { unsigned(round(com[n][0])), unsigned(round(com[n][1])), unsigned(round(com[n][2])) };
-	const coord new_min = ( com_grd + Size - patch_margin ) % Size;
-	const coord new_max = ( com_grd + patch_margin - coord {1u, 1u} ) % Size;
-	coord displacement  = ( Size + new_min - patch_min[n] ) % Size;
-	if(displacement[0]==Size[0]-1u) displacement[0] = patch_size[0]-1u;
-	if(displacement[1]==Size[1]-1u) displacement[1] = patch_size[1]-1u;
-	if(displacement[2]==Size[2]-1u) displacement[2] = patch_size[2]-1u;  
-	// update offset and patch location
-	offset[n]    = ( offset[n] + patch_size - displacement ) % patch_size;
-	patch_min[n] = new_min;
-	patch_max[n] = new_max;
-	
-    }
-    
-}
-*/
 
 __global__
 void cuUpdateAtCell(			  	cuDoubleComplex *com_x,
@@ -706,7 +557,7 @@ void cuUpdateAtCell(			  	cuDoubleComplex *com_x,
 					  	coord patch_margin,
 					  	coord Size,
 					  	coord *offset,
-					  	int n_total,
+					  	unsigned nphases,
 					  	double Spol,
 					  	double Dpol,
 					  	double Kpol,
@@ -719,7 +570,7 @@ void cuUpdateAtCell(			  	cuDoubleComplex *com_x,
 	
 	// build indices with cuda!!
 	const int m = blockIdx.x*blockDim.x + threadIdx.x;
-	if(m>=n_total) return;
+	if(m>=nphases) return;
 
 	// cuUpdateStructureTensorAtNode<<<blocksPerGrid, threadsPerBlock>>>(n);
 	// -----------------------------------------------------------------------------
@@ -771,20 +622,16 @@ void cuUpdateAtCell(			  	cuDoubleComplex *com_x,
 
 __host__ void Model::Update(bool store, unsigned t)
 {
-    /*
-    n_total   = static_cast<int>(nphases_index.size());
+    
+    n_total   = static_cast<int>(nphases_index.size() * patch_N);
     n_blocks  = (n_total + ThreadsPerBlock - 1) / ThreadsPerBlock;
     n_threads = ThreadsPerBlock;
     
     nph_total   = static_cast<int>(nphases_index.size());
     nph_blocks  = (nph_total + ThreadsPerBlock - 1) / ThreadsPerBlock;
     nph_threads = ThreadsPerBlock;
-    */
-
-    nph_total   = static_cast<int>(nphases);
-    nph_blocks  = (nph_total + ThreadsPerBlock - 1) / ThreadsPerBlock;
-    nph_threads = ThreadsPerBlock;
     
+     
     cudaError_t err = cudaGetLastError();
     if (err != cudaSuccess) {
         std::cerr << "model launch error: " << cudaGetErrorString(err) << std::endl;
@@ -815,7 +662,7 @@ __host__ void Model::Update(bool store, unsigned t)
         exit(-1);
     }
     cudaDeviceSynchronize();
-    
+ 
     cuUpdatePotAtNode<<<n_blocks, n_threads>>>(d_neighbors,
                              d_neighbors_patch,
                              d_phi,
@@ -861,6 +708,7 @@ __host__ void Model::Update(bool store, unsigned t)
         exit(-1);
     }
     cudaDeviceSynchronize();
+    
     
     
     cuUpdatePhysicalFieldsAtNode<<<n_blocks, n_threads>>>(d_neighbors,
@@ -975,11 +823,11 @@ __host__ void Model::Update(bool store, unsigned t)
                                  N,
                                  d_rand_states,
                                  store);
-                                 /*
-                                 d_field_polx,
-                                 d_field_poly,
-                                 d_field_polz);
-                                 */
+                                 
+                                 //d_field_polx,
+                                 //d_field_poly,
+                                 //d_field_polz);
+                                 
 
     err = cudaGetLastError();
     if (err != cudaSuccess) {
@@ -1026,9 +874,8 @@ __host__ void Model::Update(bool store, unsigned t)
     }
     cudaDeviceSynchronize();
     
-    /*
+    
     proliferate(t);
-    */
     
 }
 

@@ -60,6 +60,46 @@ static void seed_rand(curandState *state, unsigned long seed)
     curand_init(seed, id, 0, &state[id]);
 }
 
+void Model::_manage_device_memoryCellBirth(ManageMemory which)
+{
+    malloc_or_free(d_phi, nphases * patch_N, which);       
+    malloc_or_free(d_phi_old, nphases * patch_N, which);
+    malloc_or_free(d_V, nphases * patch_N, which);
+    malloc_or_free(d_phi_dx, nphases * patch_N, which);
+    malloc_or_free(d_phi_dy, nphases * patch_N, which);
+    malloc_or_free(d_phi_dz, nphases * patch_N, which);
+    malloc_or_free(d_dphi, nphases * patch_N, which);
+    malloc_or_free(d_dphi_old, nphases * patch_N, which);
+     
+    malloc_or_free(d_com, nphases, which);
+    malloc_or_free(d_polarization, nphases, which);
+    malloc_or_free(d_velocity, nphases, which);
+    malloc_or_free(d_patch_min, nphases, which);
+    malloc_or_free(d_patch_max, nphases, which);
+    malloc_or_free(d_offset, nphases, which);
+    malloc_or_free(d_vol, nphases, which);
+    malloc_or_free(d_Fpol, nphases, which);
+    
+    malloc_or_free(d_cSxx, nphases, which);
+    malloc_or_free(d_cSxy, nphases, which);
+    malloc_or_free(d_cSxz, nphases, which);
+    malloc_or_free(d_cSyy, nphases, which);
+    malloc_or_free(d_cSyz, nphases, which);
+    malloc_or_free(d_cSzz, nphases, which);
+    
+    malloc_or_free(d_Fpressure, nphases, which);
+    malloc_or_free(d_vorticity, nphases, which);
+    malloc_or_free(d_delta_theta_pol, nphases, which);
+    malloc_or_free(d_theta_pol, nphases, which);
+    malloc_or_free(d_theta_pol_old, nphases, which);
+    malloc_or_free(d_com_x, nphases, which);
+    malloc_or_free(d_com_y, nphases, which);
+    malloc_or_free(d_com_z, nphases, which);
+
+}
+
+
+
 void Model::_manage_device_memory(ManageMemory which)
 {
     malloc_or_free(d_phi, nphases * patch_N, which);       
@@ -108,9 +148,7 @@ void Model::_manage_device_memory(ManageMemory which)
     malloc_or_free(d_cSxz, nphases, which);
     malloc_or_free(d_cSyy, nphases, which);
     malloc_or_free(d_cSyz, nphases, which);
-    /*
-    malloc_or_free(d_nphases_index, nphases, which);
-    */
+    
     malloc_or_free(d_cSzz, nphases, which);
     malloc_or_free(d_Fpressure, nphases, which);
     malloc_or_free(d_vorticity, nphases, which);
@@ -172,9 +210,6 @@ void Model::_copy_device_memory(CopyMemory dir)
     bidirectional_memcpy(d_com_x, &com_x[0], nphases, dir);
     bidirectional_memcpy(d_com_y, &com_y[0], nphases, dir);
     bidirectional_memcpy(d_com_z, &com_z[0], nphases, dir);
-    /*
-    bidirectional_memcpy(d_nphases_index, &nphases_index[0], nphases, dir);
-    */
     
     bidirectional_memcpy(d_neighbors_patch, &neighbors_patch[0], patch_N, dir);
 
@@ -195,6 +230,7 @@ void Model::_copy_device_memory(CopyMemory dir)
     }
 }
 
+/*
 void Model::visTMP(unsigned t){
     std::vector<field> tphi;
     tphi.resize(nphases, vector<double>(patch_N, 0.));
@@ -257,20 +293,18 @@ void Model::visTMP(unsigned t){
     fclose(sortie);
      
 }
-
-/*
-void Model::proliferate(unsigned t){
-if(proliferate_bool and t > prolif_start and remainder(tau_divide*1.,prolif_freq)==0. and nphases_index.size()*1. < nphases_max){
-GetFromDevice();
-int imax = nphases_index.size() - 1;
-unsigned i = random_int_uniform(0,imax);
-initDivision(n,i);
-PutToDevice();
-tau_divide = 0;
-}
-tau_divide = tau_divide + 1;
-}
 */
+
+void Model::AllocDeviceMemoryCellBirth()
+{
+    _manage_device_memoryCellBirth(ManageMemory::Allocate);
+}
+
+void Model::FreeDeviceMemoryCellBirth()
+{
+    _manage_device_memoryCellBirth(ManageMemory::Free);
+}
+
 
 
 void Model::AllocDeviceMemory()
@@ -347,10 +381,10 @@ void Model::InitializeCUDARandomNumbers()
 
 void Model::InitializeCuda()
 {
-    n_total   = static_cast<int>(nphases * patch_N);
+    n_total   = static_cast<int>(nphases_init * patch_N);
     n_blocks  = (n_total + ThreadsPerBlock - 1) / ThreadsPerBlock;
     n_threads = ThreadsPerBlock;
     cout << "CUDA init for " << n_total << " with " << n_blocks 
-         << " blocks and " << n_threads << " threads per block " << "simulating "<<nphases<<" ALD"<<endl;
+         << " blocks and " << n_threads << " threads per block " << "simulating "<<nphases_init<<" ALD"<<endl;
 }
 

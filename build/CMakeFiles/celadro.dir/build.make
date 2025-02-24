@@ -139,10 +139,24 @@ CMakeFiles/celadro.dir/src/options.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/celadro.dir/src/options.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/siavash/Documents/research/cell_mechanics/phase_field_3D/celadro_CUDA_programming/src/options.cpp -o CMakeFiles/celadro.dir/src/options.cpp.s
 
+CMakeFiles/celadro.dir/src/proliferate.cpp.o: CMakeFiles/celadro.dir/flags.make
+CMakeFiles/celadro.dir/src/proliferate.cpp.o: ../src/proliferate.cpp
+CMakeFiles/celadro.dir/src/proliferate.cpp.o: CMakeFiles/celadro.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/siavash/Documents/research/cell_mechanics/phase_field_3D/celadro_CUDA_programming/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/celadro.dir/src/proliferate.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/celadro.dir/src/proliferate.cpp.o -MF CMakeFiles/celadro.dir/src/proliferate.cpp.o.d -o CMakeFiles/celadro.dir/src/proliferate.cpp.o -c /home/siavash/Documents/research/cell_mechanics/phase_field_3D/celadro_CUDA_programming/src/proliferate.cpp
+
+CMakeFiles/celadro.dir/src/proliferate.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/celadro.dir/src/proliferate.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/siavash/Documents/research/cell_mechanics/phase_field_3D/celadro_CUDA_programming/src/proliferate.cpp > CMakeFiles/celadro.dir/src/proliferate.cpp.i
+
+CMakeFiles/celadro.dir/src/proliferate.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/celadro.dir/src/proliferate.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/siavash/Documents/research/cell_mechanics/phase_field_3D/celadro_CUDA_programming/src/proliferate.cpp -o CMakeFiles/celadro.dir/src/proliferate.cpp.s
+
 CMakeFiles/celadro.dir/src/random.cpp.o: CMakeFiles/celadro.dir/flags.make
 CMakeFiles/celadro.dir/src/random.cpp.o: ../src/random.cpp
 CMakeFiles/celadro.dir/src/random.cpp.o: CMakeFiles/celadro.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/siavash/Documents/research/cell_mechanics/phase_field_3D/celadro_CUDA_programming/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/celadro.dir/src/random.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/siavash/Documents/research/cell_mechanics/phase_field_3D/celadro_CUDA_programming/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/celadro.dir/src/random.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/celadro.dir/src/random.cpp.o -MF CMakeFiles/celadro.dir/src/random.cpp.o.d -o CMakeFiles/celadro.dir/src/random.cpp.o -c /home/siavash/Documents/research/cell_mechanics/phase_field_3D/celadro_CUDA_programming/src/random.cpp
 
 CMakeFiles/celadro.dir/src/random.cpp.i: cmake_force
@@ -156,7 +170,7 @@ CMakeFiles/celadro.dir/src/random.cpp.s: cmake_force
 CMakeFiles/celadro.dir/src/serialization.cpp.o: CMakeFiles/celadro.dir/flags.make
 CMakeFiles/celadro.dir/src/serialization.cpp.o: ../src/serialization.cpp
 CMakeFiles/celadro.dir/src/serialization.cpp.o: CMakeFiles/celadro.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/siavash/Documents/research/cell_mechanics/phase_field_3D/celadro_CUDA_programming/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/celadro.dir/src/serialization.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/siavash/Documents/research/cell_mechanics/phase_field_3D/celadro_CUDA_programming/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/celadro.dir/src/serialization.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/celadro.dir/src/serialization.cpp.o -MF CMakeFiles/celadro.dir/src/serialization.cpp.o.d -o CMakeFiles/celadro.dir/src/serialization.cpp.o -c /home/siavash/Documents/research/cell_mechanics/phase_field_3D/celadro_CUDA_programming/src/serialization.cpp
 
 CMakeFiles/celadro.dir/src/serialization.cpp.i: cmake_force
@@ -170,7 +184,7 @@ CMakeFiles/celadro.dir/src/serialization.cpp.s: cmake_force
 CMakeFiles/celadro.dir/src/write.cpp.o: CMakeFiles/celadro.dir/flags.make
 CMakeFiles/celadro.dir/src/write.cpp.o: ../src/write.cpp
 CMakeFiles/celadro.dir/src/write.cpp.o: CMakeFiles/celadro.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/siavash/Documents/research/cell_mechanics/phase_field_3D/celadro_CUDA_programming/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/celadro.dir/src/write.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/siavash/Documents/research/cell_mechanics/phase_field_3D/celadro_CUDA_programming/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/celadro.dir/src/write.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/celadro.dir/src/write.cpp.o -MF CMakeFiles/celadro.dir/src/write.cpp.o.d -o CMakeFiles/celadro.dir/src/write.cpp.o -c /home/siavash/Documents/research/cell_mechanics/phase_field_3D/celadro_CUDA_programming/src/write.cpp
 
 CMakeFiles/celadro.dir/src/write.cpp.i: cmake_force
@@ -184,7 +198,7 @@ CMakeFiles/celadro.dir/src/write.cpp.s: cmake_force
 CMakeFiles/celadro.dir/src/cuda.cu.o: CMakeFiles/celadro.dir/flags.make
 CMakeFiles/celadro.dir/src/cuda.cu.o: ../src/cuda.cu
 CMakeFiles/celadro.dir/src/cuda.cu.o: CMakeFiles/celadro.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/siavash/Documents/research/cell_mechanics/phase_field_3D/celadro_CUDA_programming/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CUDA object CMakeFiles/celadro.dir/src/cuda.cu.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/siavash/Documents/research/cell_mechanics/phase_field_3D/celadro_CUDA_programming/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CUDA object CMakeFiles/celadro.dir/src/cuda.cu.o"
 	/usr/bin/nvcc -forward-unknown-to-host-compiler $(CUDA_DEFINES) $(CUDA_INCLUDES) $(CUDA_FLAGS) -MD -MT CMakeFiles/celadro.dir/src/cuda.cu.o -MF CMakeFiles/celadro.dir/src/cuda.cu.o.d -x cu -dc /home/siavash/Documents/research/cell_mechanics/phase_field_3D/celadro_CUDA_programming/src/cuda.cu -o CMakeFiles/celadro.dir/src/cuda.cu.o
 
 CMakeFiles/celadro.dir/src/cuda.cu.i: cmake_force
@@ -198,7 +212,7 @@ CMakeFiles/celadro.dir/src/cuda.cu.s: cmake_force
 CMakeFiles/celadro.dir/src/run.cu.o: CMakeFiles/celadro.dir/flags.make
 CMakeFiles/celadro.dir/src/run.cu.o: ../src/run.cu
 CMakeFiles/celadro.dir/src/run.cu.o: CMakeFiles/celadro.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/siavash/Documents/research/cell_mechanics/phase_field_3D/celadro_CUDA_programming/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CUDA object CMakeFiles/celadro.dir/src/run.cu.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/siavash/Documents/research/cell_mechanics/phase_field_3D/celadro_CUDA_programming/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CUDA object CMakeFiles/celadro.dir/src/run.cu.o"
 	/usr/bin/nvcc -forward-unknown-to-host-compiler $(CUDA_DEFINES) $(CUDA_INCLUDES) $(CUDA_FLAGS) -MD -MT CMakeFiles/celadro.dir/src/run.cu.o -MF CMakeFiles/celadro.dir/src/run.cu.o.d -x cu -dc /home/siavash/Documents/research/cell_mechanics/phase_field_3D/celadro_CUDA_programming/src/run.cu -o CMakeFiles/celadro.dir/src/run.cu.o
 
 CMakeFiles/celadro.dir/src/run.cu.i: cmake_force
@@ -216,6 +230,7 @@ celadro_OBJECTS = \
 "CMakeFiles/celadro.dir/src/init.cpp.o" \
 "CMakeFiles/celadro.dir/src/main.cpp.o" \
 "CMakeFiles/celadro.dir/src/options.cpp.o" \
+"CMakeFiles/celadro.dir/src/proliferate.cpp.o" \
 "CMakeFiles/celadro.dir/src/random.cpp.o" \
 "CMakeFiles/celadro.dir/src/serialization.cpp.o" \
 "CMakeFiles/celadro.dir/src/write.cpp.o" \
@@ -230,6 +245,7 @@ CMakeFiles/celadro.dir/cmake_device_link.o: CMakeFiles/celadro.dir/src/files.cpp
 CMakeFiles/celadro.dir/cmake_device_link.o: CMakeFiles/celadro.dir/src/init.cpp.o
 CMakeFiles/celadro.dir/cmake_device_link.o: CMakeFiles/celadro.dir/src/main.cpp.o
 CMakeFiles/celadro.dir/cmake_device_link.o: CMakeFiles/celadro.dir/src/options.cpp.o
+CMakeFiles/celadro.dir/cmake_device_link.o: CMakeFiles/celadro.dir/src/proliferate.cpp.o
 CMakeFiles/celadro.dir/cmake_device_link.o: CMakeFiles/celadro.dir/src/random.cpp.o
 CMakeFiles/celadro.dir/cmake_device_link.o: CMakeFiles/celadro.dir/src/serialization.cpp.o
 CMakeFiles/celadro.dir/cmake_device_link.o: CMakeFiles/celadro.dir/src/write.cpp.o
@@ -241,7 +257,7 @@ CMakeFiles/celadro.dir/cmake_device_link.o: /usr/lib/x86_64-linux-gnu/libboost_p
 CMakeFiles/celadro.dir/cmake_device_link.o: /usr/lib/gcc/x86_64-linux-gnu/11/libgomp.so
 CMakeFiles/celadro.dir/cmake_device_link.o: /usr/lib/x86_64-linux-gnu/libpthread.a
 CMakeFiles/celadro.dir/cmake_device_link.o: CMakeFiles/celadro.dir/dlink.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/siavash/Documents/research/cell_mechanics/phase_field_3D/celadro_CUDA_programming/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Linking CUDA device code CMakeFiles/celadro.dir/cmake_device_link.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/siavash/Documents/research/cell_mechanics/phase_field_3D/celadro_CUDA_programming/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Linking CUDA device code CMakeFiles/celadro.dir/cmake_device_link.o"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/celadro.dir/dlink.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -255,6 +271,7 @@ celadro_OBJECTS = \
 "CMakeFiles/celadro.dir/src/init.cpp.o" \
 "CMakeFiles/celadro.dir/src/main.cpp.o" \
 "CMakeFiles/celadro.dir/src/options.cpp.o" \
+"CMakeFiles/celadro.dir/src/proliferate.cpp.o" \
 "CMakeFiles/celadro.dir/src/random.cpp.o" \
 "CMakeFiles/celadro.dir/src/serialization.cpp.o" \
 "CMakeFiles/celadro.dir/src/write.cpp.o" \
@@ -269,6 +286,7 @@ celadro: CMakeFiles/celadro.dir/src/files.cpp.o
 celadro: CMakeFiles/celadro.dir/src/init.cpp.o
 celadro: CMakeFiles/celadro.dir/src/main.cpp.o
 celadro: CMakeFiles/celadro.dir/src/options.cpp.o
+celadro: CMakeFiles/celadro.dir/src/proliferate.cpp.o
 celadro: CMakeFiles/celadro.dir/src/random.cpp.o
 celadro: CMakeFiles/celadro.dir/src/serialization.cpp.o
 celadro: CMakeFiles/celadro.dir/src/write.cpp.o
@@ -281,7 +299,7 @@ celadro: /usr/lib/gcc/x86_64-linux-gnu/11/libgomp.so
 celadro: /usr/lib/x86_64-linux-gnu/libpthread.a
 celadro: CMakeFiles/celadro.dir/cmake_device_link.o
 celadro: CMakeFiles/celadro.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/siavash/Documents/research/cell_mechanics/phase_field_3D/celadro_CUDA_programming/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Linking CXX executable celadro"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/siavash/Documents/research/cell_mechanics/phase_field_3D/celadro_CUDA_programming/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Linking CXX executable celadro"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/celadro.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
