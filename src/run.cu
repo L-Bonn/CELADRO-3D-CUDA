@@ -332,7 +332,7 @@ void cuUpdatePhysicalFieldsAtNode( stencil *neighbors,
 	const coord qpos = { (q/patch_size[1])%patch_size[0] , q%patch_size[1]  , q/( patch_size[0]*patch_size[1] ) };
     	const coord dpos = ( (qpos + offset[n])%patch_size + patch_min[n] )%Size;
     	const auto k = dpos[1] + Size[1]*dpos[0] + Size[0]*Size[1]*dpos[2];
-	// double p = phi[m];
+	double p = phi[m];
 
 	const auto& s  = neighbors[k];
 	const auto& sq = neighbors_patch[q];
@@ -363,12 +363,12 @@ void cuUpdatePhysicalFieldsAtNode( stencil *neighbors,
 	//atomicAdd(&cell_fshape,fshape);
 	//atomicAdd(&cell_fnem,fnem);
 	
-	atomicAdd(&cSxx[n],field_sxx[k]);
-	atomicAdd(&cSxy[n],field_sxy[k]);
-	atomicAdd(&cSxz[n],field_sxz[k]);
-	atomicAdd(&cSyy[n],field_syy[k]);
-	atomicAdd(&cSyz[n],field_syz[k]);
-	atomicAdd(&cSzz[n],field_szz[k]);
+	atomicAdd(&cSxx[n],p*field_sxx[k]);
+	atomicAdd(&cSxy[n],p*field_sxy[k]);
+	atomicAdd(&cSxz[n],p*field_sxz[k]);
+	atomicAdd(&cSyy[n],p*field_syy[k]);
+	atomicAdd(&cSyz[n],p*field_syz[k]);
+	atomicAdd(&cSzz[n],p*field_szz[k]);
 	
 	// store derivatives
 	phi_dx[m] = dx;

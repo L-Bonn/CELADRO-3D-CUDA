@@ -160,8 +160,8 @@ void Model::_manage_device_memory(ManageMemory which)
     malloc_or_free(d_cSxz, nphases, which);
     malloc_or_free(d_cSyy, nphases, which);
     malloc_or_free(d_cSyz, nphases, which);
-    
     malloc_or_free(d_cSzz, nphases, which);
+    
     malloc_or_free(d_Fpressure, nphases, which);
     malloc_or_free(d_vorticity, nphases, which);
     malloc_or_free(d_delta_theta_pol, nphases, which);
@@ -204,7 +204,14 @@ void Model::_copy_device_memory(CopyMemory dir)
     bidirectional_memcpy(d_field_syy, &field_syy[0], N, dir);
     bidirectional_memcpy(d_field_syz, &field_syz[0], N, dir);
     bidirectional_memcpy(d_field_szz, &field_szz[0], N, dir);
-    
+
+    bidirectional_memcpy(d_cSxx, &cSxx[0], nphases, dir);
+    bidirectional_memcpy(d_cSxy, &cSxy[0], nphases, dir);
+    bidirectional_memcpy(d_cSxz, &cSxz[0], nphases, dir);
+    bidirectional_memcpy(d_cSyy, &cSyy[0], nphases, dir);
+    bidirectional_memcpy(d_cSyz, &cSyz[0], nphases, dir);
+    bidirectional_memcpy(d_cSzz, &cSzz[0], nphases, dir);
+        
     bidirectional_memcpy(d_field_press, &field_press[0], N, dir);
     bidirectional_memcpy(d_neighbors, &neighbors[0], N, dir);
     bidirectional_memcpy(d_walls, &walls[0], N, dir);

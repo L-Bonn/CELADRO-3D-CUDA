@@ -302,17 +302,24 @@ void Model::BirthCell(unsigned n)
 }
 
 
-void Model::initDivision(unsigned n, unsigned i, double division_orientation){
+void Model::initDivision(unsigned n, unsigned i, double division_orientation, unsigned t){
+	double relt = static_cast<double>(t/(nsubsteps*ninfo));
 	BirthCellMemories(nphases_index_head + 3);
 	nphases_index_head = nphases_index_head + 1;
+	GlobalCellIndex = GlobalCellIndex + 1;
+	int cellGen = cellHist[n].generation + 1;
+	cellLineage(/*cell_id=*/GlobalCellIndex,/*parent_id=*/n,/*birth_time=*/relt,/*death_time=*/-1,/*physicalprop=*/gam,/*generation=*/cellGen);
 	nphases_index.push_back(nphases_index_head);
 	nphases_index_head = nphases_index_head + 1;
+	GlobalCellIndex = GlobalCellIndex + 1;
+	cellLineage(/*cell_id=*/GlobalCellIndex,/*parent_id=*/n,/*birth_time=*/relt,/*death_time=*/-1,/*physicalprop=*/gam,/*generation=*/cellGen);
 	nphases_index.push_back(nphases_index_head);
 	DivideCell(i,nphases_index_head,division_orientation);
 	BirthCell(nphases_index_head);
 	BirthCell(nphases_index_head-1);
 	ComputeBirthCellCOM(nphases_index_head,i);
 	ComputeBirthCellCOM(nphases_index_head-1,i);
+	cellLineage(/*cell_id=*/n,/*parent_id=*/-1,/*birth_time=*/-1,/*death_time=*/relt,/*physicalprop=*/gam,/*generation=*/cellGen);
 	KillCell(n,i);
 }
 
@@ -369,6 +376,40 @@ std::vector<double> Model::compute_eigen(double sxx, double sxy, double syy){
 }
 
 
+void Model::cellLineage(int cell_id, int parent_id, double birth_t, double death_t, double prop, int gen)
+{
+    // 1) Check if cell_id already exists
+    auto it = cellHist.find(cell_id);
+    if (it != cellHist.end()) {
+        // -- EXISTING CELL --
+        // Only update fields that make sense for your scenario.
+        // For example, if death_t != -1.0, update the death_time:
+        if (death_t != -1.0) {
+            it->second.death_time = death_t;
+        }
+
+        // If you also want to overwrite parent, generation, etc.:
+        // it->second.parent     = parent_id;  
+        // it->second.birth_time = birth_t;     
+        // it->second.generation = gen;
+        // (Or use sentinel logic to skip fields.)
+    }
+    else {
+        // -- NEW CELL --
+        cellInfo info;
+        info.birth_time = birth_t;
+        info.death_time = death_t;      // -1.0 => alive
+        info.parent     = parent_id;    // -1 => no parent
+        info.generation = gen;
+        info.physicalprop = prop;
+
+
+        // Insert in the global map
+        cellHist[cell_id] = info;
+    }
+}
+
+
 std::vector<double> Model::stress_criterion() {
         unsigned best_i = 0;
         unsigned best_n = 0;
@@ -385,7 +426,6 @@ std::vector<double> Model::stress_criterion() {
             double eigvalmax = eigen_results[0];
             double eigvalmin = eigen_results[1];
             // eigen_results[2] and eigen_results[3] form the eigenvector for eigvalmax
-
             // Compute the ratio; (assumes eigvalmin is nonzero)
             double ratio = eigvalmax / eigvalmin;
 
@@ -410,13 +450,14 @@ void Model::proliferate(unsigned t){
 		std::vector<double> pre_prolif_info = stress_criterion();
 		unsigned i = static_cast<unsigned>(pre_prolif_info[0]);
 		unsigned n = static_cast<unsigned>(pre_prolif_info[1]);
+
 		GetFromDevice();
 		FreeDeviceMemoryCellBirth();
 		//int imax = nphases_index.size() - 1;
 		//unsigned i = random_int_uniform(0,imax);
 		//unsigned n = nphases_index[i];
 		cout<<"dividing cell "<<n<<" with index "<<i<<endl;
-		initDivision(n,i,pre_prolif_info[2]);
+		initDivision(n,i,pre_prolif_info[2],t);
 		nphases = nphases_index.size();
 		nphases_index_head = nphases - 1;
 		AllocDeviceMemoryCellBirth();
@@ -428,6 +469,45 @@ void Model::proliferate(unsigned t){
 }
 
 
+void Model::write_cellHist_binary(const std::string &filename,
+                                  unsigned currentTime,
+                                  const std::map<int, cellInfo> &hist)
+{
+    std::ofstream out(filename, std::ios::binary | std::ios::app);
+    if (!out) {
+        std::cerr << "Could not open file " << filename << " for binary write.\n";
+        return;
+    }
+
+    // 1) Write currentTime as double (8 bytes)
+    double timeVal = static_cast<double>(currentTime);
+    out.write(reinterpret_cast<const char*>(&timeVal), sizeof(timeVal));
+
+    // 2) Write number of cells as int (4 bytes)
+    int nCells = static_cast<int>(hist.size());
+    out.write(reinterpret_cast<const char*>(&nCells), sizeof(nCells));
+
+    // 3) For each cell, write:
+    //    cellID (int, 4 bytes)
+    //    birth_time (double, 8 bytes)
+    //    death_time (double, 8 bytes)
+    //    parent (int, 4 bytes)
+    //    physicalprop (double, 8 bytes)
+    //    generation (int, 4 bytes)
+    for (auto &kv : hist) {
+        int cellID = kv.first;
+        const cellInfo &ci = kv.second;
+
+        out.write(reinterpret_cast<const char*>(&cellID), sizeof(cellID));
+        out.write(reinterpret_cast<const char*>(&ci.birth_time),    sizeof(ci.birth_time));
+        out.write(reinterpret_cast<const char*>(&ci.death_time),    sizeof(ci.death_time));
+        out.write(reinterpret_cast<const char*>(&ci.parent),        sizeof(ci.parent));
+        out.write(reinterpret_cast<const char*>(&ci.physicalprop),  sizeof(ci.physicalprop));
+        out.write(reinterpret_cast<const char*>(&ci.generation),    sizeof(ci.generation));
+    }
+
+    out.close();
+}
 
 
 

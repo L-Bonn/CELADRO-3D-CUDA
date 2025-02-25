@@ -246,6 +246,7 @@ void Model::ParseProgramOptions(int ac, char **av)
   
   nphases = nphases_init;
   nphases_index_head = nphases-1;
+  GlobalCellIndex = nphases-1;
 
   // set nstart to the next correct frame (round above)
   if(nstart%ninfo) nstart = (1u+nstart/ninfo)*ninfo;

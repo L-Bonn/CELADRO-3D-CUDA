@@ -272,7 +272,15 @@ enum class ManageMemory {
   
   // ===========================================================================
   // related to proliferation 
-  
+  struct cellInfo{
+  double birth_time;
+  double death_time;
+  int parent;
+  double physicalprop;
+  int generation;
+  };
+  std::map<int, cellInfo> cellHist;
+  void cellLineage(int cell_id, int parent_id, double birth_t, double death_t, double physicalprop, int gen);
   std::vector<unsigned> nphases_index;
   int tau_divide = 0;
   bool proliferate_bool = true;
@@ -281,9 +289,9 @@ enum class ManageMemory {
   unsigned nphases_init;
   unsigned nphases_max = 1000;
   unsigned nphases_index_head;
-
+  unsigned GlobalCellIndex;
   void proliferate(unsigned);
-  void initDivision(unsigned n, unsigned i, double angle);
+  void initDivision(unsigned n, unsigned i, double angle, unsigned t);
   void BirthCellMemories(unsigned new_nphases);
   void DivideCell(unsigned n, unsigned nphases_current, double angle);
   void BirthCell(unsigned n);
@@ -296,6 +304,9 @@ enum class ManageMemory {
   void _manage_device_memoryCellBirth(ManageMemory);
   std::vector<double> compute_eigen(double sxx,double sxy, double syy);
   std::vector<double> stress_criterion();
+  void write_cellHist_binary(const std::string &filename,
+                               unsigned currentTime,
+                               const std::map<int, cellInfo> &hist);
 				  
   // ===========================================================================
   // Options. Implemented in options.cpp

@@ -24,9 +24,9 @@ using namespace std;
 void Model::Initialize()
 {
 
-  
   for(unsigned k = 0 ; k < nphases_init ; k++){
   nphases_index.push_back(k);
+  cellLineage(/*cell_id=*/k,/*parent_id=*/-1,/*birth_time=*/0,/*death_time=*/-1,/*physicalprop=*/gam,/*generation=*/0);
   }
   
 

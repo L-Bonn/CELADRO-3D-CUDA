@@ -218,10 +218,10 @@ def main():
     ninfo = 10
     Lz = int(40.0)
 
-    ncells = 25   # total number of cells (e.g., 9 => 3x3 grid)
+    ncells = 9   # total number of cells (e.g., 9 => 3x3 grid)
     R0 = 8.0
     rad = R0
-    lbox = 1.5 * R0
+    lbox = 2 * R0
     nsqrt = int(math.sqrt(ncells))
     Lx = int(nsqrt * lbox)
     Ly = int(nsqrt * lbox)
@@ -229,7 +229,7 @@ def main():
     nsubsteps = 10
     bc = 2
     margin = int(18.0)
-    relax_time = 100
+    relax_time = 10
     wall_thickness = 7.0
     zcoor = int(wall_thickness + R0/2.0)
 
