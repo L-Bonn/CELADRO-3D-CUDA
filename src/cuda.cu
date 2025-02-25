@@ -80,6 +80,12 @@ void Model::_manage_device_memoryCellBirth(ManageMemory which)
     malloc_or_free(d_vol, nphases, which);
     malloc_or_free(d_Fpol, nphases, which);
     
+    malloc_or_free(d_stored_gam,nphases,which);
+    malloc_or_free(d_stored_omega_cc,nphases,which);
+    malloc_or_free(d_stored_omega_cs,nphases,which);
+    malloc_or_free(d_stored_alpha,nphases,which);
+    malloc_or_free(d_stored_dpol,nphases,which);
+    
     malloc_or_free(d_cSxx, nphases, which);
     malloc_or_free(d_cSxy, nphases, which);
     malloc_or_free(d_cSxz, nphases, which);
@@ -143,6 +149,12 @@ void Model::_manage_device_memory(ManageMemory which)
     malloc_or_free(d_vol, nphases, which);
     malloc_or_free(d_Fpol, nphases, which);
     
+    malloc_or_free(d_stored_gam,nphases,which);
+    malloc_or_free(d_stored_omega_cc,nphases,which);
+    malloc_or_free(d_stored_omega_cs,nphases,which);
+    malloc_or_free(d_stored_alpha,nphases,which);
+    malloc_or_free(d_stored_dpol,nphases,which);
+    
     malloc_or_free(d_cSxx, nphases, which);
     malloc_or_free(d_cSxy, nphases, which);
     malloc_or_free(d_cSxz, nphases, which);
@@ -179,6 +191,12 @@ void Model::_copy_device_memory(CopyMemory dir)
     bidirectional_memcpy(d_field_velx, &field_velx[0], N, dir);
     bidirectional_memcpy(d_field_vely, &field_vely[0], N, dir);
     bidirectional_memcpy(d_field_velz, &field_velz[0], N, dir);
+    
+    bidirectional_memcpy(d_stored_gam, &stored_gam[0], nphases, dir);
+    bidirectional_memcpy(d_stored_omega_cc, &stored_omega_cc[0], nphases, dir);
+    bidirectional_memcpy(d_stored_omega_cs, &stored_omega_cs[0], nphases, dir);
+    bidirectional_memcpy(d_stored_alpha, &stored_alpha[0], nphases, dir);
+    bidirectional_memcpy(d_stored_dpol, &stored_dpol[0], nphases, dir);
     
     bidirectional_memcpy(d_field_sxx, &field_sxx[0], N, dir);
     bidirectional_memcpy(d_field_sxy, &field_sxy[0], N, dir); 

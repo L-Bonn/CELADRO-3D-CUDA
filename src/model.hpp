@@ -106,42 +106,25 @@ enum class ManageMemory {
   std::vector<vec<double, 3>> com, com_prev;
   /** stress fields */
   field field_sxx, field_sxy, field_sxz, field_syy, field_syz, field_szz;
-
-  
-  
-  
+  /** heterogeneous cell properties */ 
+  std::vector<double> stored_gam, stored_omega_cc, stored_omega_cs, stored_alpha, stored_dpol;
+  /** Alignement options (see options.cpp) */
+  int align_nematic_to = 0, align_polarization_to = 1;
   
   
   
   /** Sum_i S_i phi_i */
   //field sumS00, sumS01, sumS02, sumS12, sumS11, sumS22; 
-  /** Sum_i Q_i phi_i */
   //field sumQ00, sumQ01;
-  /** Sum_i vol_i phi_i */
-  /** Sum of square, third, and fourth powers of phi at each node */
-  //field square, thirdp, fourthp, cIds;
   /** Structure tensor */
   //std::vector<double> S00, S01, S02, S12, S11, S22;
-  //std::vector<double> gams;
-  //std::vector<double> omega_ccs;
-  //std::vector<double> omega_cws;
-  //std::vector<double> xis;
-  //std::vector<double> alphas;
-  //std::vector<double> kappas;
-  //std::vector<double> mus;
-  //std::vector<double> Rs;
-  //std::vector<double> V0;
-  //std::vector<double> zetaS_field;
-  //std::vector<double> zetaQ_field;
-  //std::vector<double> cellTypes;
   /** Q-tensor */
   //std::vector<double> Q00, Q01;
   /** Direction of the nematics */
   //std::vector<double> theta_nem, theta_nem_old;
   /** Elastic torque for the nematic */
   //std::vector<double> tau;
-  /** Alignement options (see options.cpp) */
-  int align_nematic_to = 0, align_polarization_to = 1;
+
 
   /** @} */
 
@@ -300,9 +283,9 @@ enum class ManageMemory {
   unsigned nphases_index_head;
 
   void proliferate(unsigned);
-  void initDivision(unsigned n, unsigned i);
+  void initDivision(unsigned n, unsigned i, double angle);
   void BirthCellMemories(unsigned new_nphases);
-  void DivideCell(unsigned n, unsigned nphases_current);
+  void DivideCell(unsigned n, unsigned nphases_current, double angle);
   void BirthCell(unsigned n);
   void ComputeBirthCellCOM(unsigned n, unsigned nbirth);
   void KillCell(unsigned n, unsigned i);
@@ -311,6 +294,8 @@ enum class ManageMemory {
   void AllocDeviceMemoryCellBirth();
   void FreeDeviceMemoryCellBirth();
   void _manage_device_memoryCellBirth(ManageMemory);
+  std::vector<double> compute_eigen(double sxx,double sxy, double syy);
+  std::vector<double> stress_criterion();
 				  
   // ===========================================================================
   // Options. Implemented in options.cpp
@@ -364,7 +349,7 @@ enum class ManageMemory {
 
   /** Add cell with number n at a certain position */
   void AddCell(unsigned n, const coord& center);
-  void AddCellMix(unsigned n, const coord& center, double zetaSi, double zetaQi, double gami, double omegai, double omega_walli, double kappai, double mui, double alphai, double xi, double Ri, double cellType);
+  void AddCellMix(unsigned n, const coord& center);
 
   /** Subfunction for AddCell() */
   void AddCellAtNode(unsigned n, unsigned q, const coord& center);
@@ -478,12 +463,12 @@ enum class ManageMemory {
          *d_theta, *d_sum_one, *d_sum_two,*d_field_velx, *d_field_vely, *d_field_velz, 
          *d_field_polx, *d_field_poly, *d_field_polz, *d_field_press, *d_delta_theta_pol,
          *d_theta_pol, *d_theta_pol_old, *d_field_sxx, *d_field_sxy, *d_field_sxz, *d_field_syy,
-         *d_field_syz, *d_field_szz, *d_cSxx, *d_cSxy, *d_cSxz, *d_cSyy, *d_cSyz, *d_cSzz;
+         *d_field_syz, *d_field_szz, *d_cSxx, *d_cSxy, *d_cSxz, *d_cSyy, *d_cSyz, *d_cSzz,
+         *d_stored_gam, *d_stored_omega_cc, *d_stored_omega_cs, *d_stored_alpha, *d_stored_dpol;
   vec<double, 3>  *d_polarization, *d_velocity, *d_Fpol, *d_Fpressure, *d_vorticity, *d_com;
   stencil         *d_neighbors, *d_neighbors_patch;
   coord           *d_patch_min, *d_patch_max, *d_offset;
   cuDoubleComplex *d_com_x, *d_com_y, *d_com_z, *d_com_x_table, *d_com_y_table, *d_com_z_table;
-
   
   /** @} */
 

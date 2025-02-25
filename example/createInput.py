@@ -21,13 +21,13 @@ def fRand(fMin, fMax):
 # File output functions
 # ---------------------------
 def write_simCard(config, gamma, omegacc, omegacw, alpha, nsteps, ninfo, Lx, Ly, Lz,
-                    nsubsteps, bc, margin, relax_time, nphases, mu, lambda_, kappa,
+                    nsubsteps, bc, margin, relax_time, nphases_init,nphases_max, mu, lambda_, kappa,
                     rad, xi, wallThich, wallKappa, SPOL, DPOL, JPOL, KPOL,
-                    zetaS, zetaQ, SNEM, KNEM, JNEM, WNEM, count):
+                    zetaS, zetaQ, SNEM, KNEM, JNEM, WNEM,prolif_start,prolif_freq,prolif, count):
     """
     Write the simulation card file with the given parameters.
     """
-    filename = f"simCard_{count}.dat"
+    filename = f"simCard.dat"
     with open(filename, "w") as f:
         f.write("# Sample runcard\n")
         f.write(f"config = {config}\n")
@@ -40,7 +40,8 @@ def write_simCard(config, gamma, omegacc, omegacw, alpha, nsteps, ninfo, Lx, Ly,
         f.write(f"bc = {bc}\n")
         f.write(f"margin = {margin}\n")
         f.write(f"relax-time = {relax_time}\n")
-        f.write(f"nphases = {nphases}\n")
+        f.write(f"nphases_init = {nphases_init}\n")
+        f.write(f"nphases_max = {nphases_max}\n")
         f.write(f"gamma = {gamma}\n")
         f.write(f"mu = {mu}\n")
         f.write(f"lambda = {lambda_}\n")
@@ -51,6 +52,9 @@ def write_simCard(config, gamma, omegacc, omegacw, alpha, nsteps, ninfo, Lx, Ly,
         f.write(f"wall-thickness = {wallThich}\n")
         f.write(f"kappa_cs = {wallKappa}\n")
         f.write(f"omega_cs = {omegacw}\n")
+        f.write(f"prolif_start = {prolif_start}\n")
+        f.write(f"prolif_freq = {prolif_freq}\n")
+        f.write(f"proliferate = {prolif}\n")
         f.write(f"alpha = {alpha}\n")
         f.write(f"S-pol = {SPOL}\n")
         f.write(f"D-pol = {DPOL}\n")
@@ -214,10 +218,10 @@ def main():
     ninfo = 10
     Lz = int(40.0)
 
-    ncells = 16   # total number of cells (e.g., 9 => 3x3 grid)
+    ncells = 25   # total number of cells (e.g., 9 => 3x3 grid)
     R0 = 8.0
     rad = R0
-    lbox = 2.0 * R0
+    lbox = 1.5 * R0
     nsqrt = int(math.sqrt(ncells))
     Lx = int(nsqrt * lbox)
     Ly = int(nsqrt * lbox)
@@ -230,8 +234,8 @@ def main():
     zcoor = int(wall_thickness + R0/2.0)
 
     gamma = 0.008
-    omegacc = 0.0008
-    omegacw = 0.002
+    omegacc = 0.001
+    omegacw = 0.0025
     alpha = 0.05
     xi = 1.0
     zetaS = 0.0
@@ -247,9 +251,12 @@ def main():
     KNEM = 0.0
     JNEM = 0.0
     WNEM = 0.0
-    JPOL = 0.001
+    JPOL = 0.005
     KPOL = 0.001
-    DPOL = 0.001
+    DPOL = 0.01
+    prolif_start = 500;
+    prolif_freq = 500;
+    prolif = 'true'
 
     global d_max_mc
     d_max_mc = 1.0
@@ -257,9 +264,10 @@ def main():
     npx = nsqrt
     npy = nsqrt
     npz = 1
-    nphases = int(ncells)
+    nphases_init = int(ncells)
+    nphases_max = 400
 
-    print(f"Number of cells are: {nphases} with rad: {rad}")
+    print(f"Number of cells are: {nphases_init} with rad: {rad}")
 
     # Allocate lattice arrays (using lists)
     total_points = npx * npy * npz
@@ -269,12 +277,12 @@ def main():
     zcf = [0.0] * total_points
 
     # Initialize a square lattice
-    xcf, ycf, zcf = init_square_lattice(lbox, nphases, npx, npy, npz)
+    xcf, ycf, zcf = init_square_lattice(lbox, nphases_init, npx, npy, npz)
     # Optionally, you can apply disorder:
     # disorder_mc(d_max_mc, xcf, ycf, zcf)
 
     # For debugging, you might write out the lattice to a file
-    # write_lattice("lattice.dat", nphases, xcf, ycf, zcf, zcoor)
+    # write_lattice("lattice.dat", nphases_init, xcf, ycf, zcf, zcoor)
 
     config = "input const"
 
@@ -330,15 +338,15 @@ def main():
                                             RAD = rad_mix[hh]
 
                                             # Write position file (always writes "input_str.dat")
-                                            write_posfile_mix_perc(int(ncells), xcf, ycf, zcf, zcoor, count)
+                                            write_posfile_mix_perc(nphases_init, xcf, ycf, zcf, zcoor, count)
 
                                             # Write simulation card file
                                             write_simCard(config, gamma, omegacc, omegacw, alpha,
                                                           nsteps, ninfo, Lx, Ly, Lz, nsubsteps, bc,
-                                                          margin, relax_time, int(ncells), mu, lambda_,
+                                                          margin, relax_time, nphases_init,nphases_max, mu, lambda_,
                                                           kappa, rad, xi, wall_thickness, wall_kappa,
                                                           SPOL, DPOL, JPOL, KPOL, zetaS, zetaQ,
-                                                          SNEM, KNEM, JNEM, WNEM, count)
+                                                          SNEM, KNEM, JNEM, WNEM,prolif_start,prolif_freq,prolif, count)
 
                                             # You can compute ratios if needed:
                                             ratio_a = OMEGACC_A / OMEGACC_B if OMEGACC_B != 0 else None

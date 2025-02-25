@@ -159,6 +159,15 @@ void Model::SetCellNumber(unsigned new_nphases)
   theta_pol.resize(nphases, 0.);
   theta_pol_old.resize(nphases, 0.);
   delta_theta_pol.resize(nphases, 0.);
+  
+  stored_gam.resize(nphases,0.);
+  stored_omega_cc.resize(nphases,0.);
+  stored_omega_cs.resize(nphases,0.);
+  stored_alpha.resize(nphases,0.);
+  stored_dpol.resize(nphases,0.);
+  
+  
+    
   //theta_nem.resize(nphases, 0.);
   /*
   alphas.resize(nphases,0.);

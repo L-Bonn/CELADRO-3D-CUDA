@@ -66,20 +66,13 @@ void Model::BirthCellMemories(unsigned new_nphases){
   com_y.resize(new_nphases, 0.);
   com_z.resize(new_nphases, 0.);
   
-  /*
-  alphas.resize(new_nphases,0.);
-  zetaS_field.resize(new_nphases,0.);
-  zetaQ_field.resize(new_nphases,0.);
-  gams.resize(new_nphases,0.);
-  omega_ccs.resize(new_nphases,0.);
-  omega_cws.resize(new_nphases,0.);
-  xis.resize(new_nphases,0.);
-  kappas.resize(new_nphases,0.);
-  mus.resize(new_nphases,0.);
-  Rs.resize(new_nphases,0.);
-  V0.resize(new_nphases,0.);
-  cellTypes.resize(new_nphases,0.);
+  stored_gam.resize(new_nphases,0.);
+  stored_omega_cc.resize(new_nphases,0.);
+  stored_omega_cs.resize(new_nphases,0.);
+  stored_alpha.resize(new_nphases,0.);
+  stored_dpol.resize(new_nphases,0.);
   
+  /*  
   S00.resize(new_nphases, 0.);
   S01.resize(new_nphases, 0.);
   S02.resize(new_nphases, 0.);
@@ -93,49 +86,26 @@ void Model::BirthCellMemories(unsigned new_nphases){
 
 }
 
-void Model::DivideCell(unsigned n, unsigned idx){
+void Model::DivideCell(unsigned n, unsigned idx, double division_orientation){
 
   double px = com[n][0];
   double py = com[n][1];
   double pz = com[n][2];
-  
-  /*
-  gams[idx] = gams[n];
-  gams[idx-1] = gams[n];
-  
-  zetaS_field[idx] = zetaS_field[n];
-  zetaS_field[idx-1] = zetaS_field[n];
 
-  zetaQ_field[idx] = zetaQ_field[n];
-  zetaQ_field[idx-1] = zetaQ_field[n];
+  stored_gam[idx] = stored_gam[n];
+  stored_gam[idx-1] = stored_gam[n];
   
-  omega_ccs[idx] = omega_ccs[n];
-  omega_ccs[idx-1] = omega_ccs[n];
+  stored_omega_cc[idx] = stored_omega_cc[n];
+  stored_omega_cc[idx-1] = stored_omega_cc[n];
+
+  stored_omega_cs[idx] = stored_omega_cs[n];
+  stored_omega_cs[idx-1] = stored_omega_cs[n];
   
-  omega_cws[idx] = omega_cws[n];
-  omega_cws[idx-1] = omega_cws[n];
+  stored_alpha[idx] = stored_alpha[n];
+  stored_alpha[idx-1] = stored_alpha[n];
   
-  kappas[idx] = kappas[n];
-  kappas[idx-1] = kappas[n];
-  
-  mus[idx] = mus[n];
-  mus[idx-1] = mus[n];
-  
-  Rs[idx] = Rs[n];
-  Rs[idx-1] = Rs[n];
-  
-  V0[idx] = V0[n];
-  V0[idx-1] = V0[n];
-  
-  alphas[idx] = alphas[n];
-  alphas[idx-1] = alphas[n];
-  
-  xis[idx] = xis[n];
-  xis[idx-1] = xis[n];
-  
-  cellTypes[idx] = cellTypes[n];
-  cellTypes[idx-1] = cellTypes[n];
-  */
+  stored_dpol[idx] = stored_dpol[n];
+  stored_dpol[idx-1] = stored_dpol[n];
   
   patch_min[idx] = patch_min[n];
   patch_min[idx-1] = patch_min[n];
@@ -269,8 +239,15 @@ void Model::KillCell(unsigned n, unsigned i){
 	com_y.erase(com_y.begin()+i);
 	com_z.erase(com_z.begin()+i);
 	
-	
 	nphases_index.erase(nphases_index.begin()+i);
+	
+	stored_gam.erase(stored_gam.begin()+i);
+	stored_omega_cc.erase(stored_omega_cc.begin()+i);
+	stored_omega_cs.erase(stored_omega_cs.begin()+i);
+	stored_alpha.erase(stored_alpha.begin()+i);
+	stored_dpol.erase(stored_dpol.begin()+i);
+	
+
 }
 /*
 void Model::KillCell(unsigned n,unsigned i){
@@ -325,55 +302,125 @@ void Model::BirthCell(unsigned n)
 }
 
 
-void Model::initDivision(unsigned n, unsigned i){
+void Model::initDivision(unsigned n, unsigned i, double division_orientation){
 	BirthCellMemories(nphases_index_head + 3);
 	nphases_index_head = nphases_index_head + 1;
-	//cout<<"current number of cells: "<<nphases_index_head<<endl;
 	nphases_index.push_back(nphases_index_head);
 	nphases_index_head = nphases_index_head + 1;
-	//cout<<"current number of cells: "<<nphases_index_head<<endl;
 	nphases_index.push_back(nphases_index_head);
-	DivideCell(i,nphases_index_head);
+	DivideCell(i,nphases_index_head,division_orientation);
 	BirthCell(nphases_index_head);
 	BirthCell(nphases_index_head-1);
-
 	ComputeBirthCellCOM(nphases_index_head,i);
 	ComputeBirthCellCOM(nphases_index_head-1,i);
-	//print_new_cell_props();
 	KillCell(n,i);
 }
 
 
+std::vector<double> Model::compute_eigen(double sxx, double sxy, double syy){
+
+        double trace = sxx + syy;
+        double delta = std::sqrt((sxx - syy) * (sxx - syy) + 4.0 * sxy * sxy);
+        double eig1 = 0.5 * (trace + delta);
+        double eig2 = 0.5 * (trace - delta);
+
+        double eigvalmax, eigvalmin;
+        if (eig1 >= eig2) {
+            eigvalmax = eig1;
+            eigvalmin = eig2;
+        } else {
+            eigvalmax = eig2;
+            eigvalmin = eig1;
+        }
+
+        // Compute eigenvectors.
+        // For a symmetric 2x2 matrix, one common formula for the eigenvector of an eigenvalue λ is:
+        //   (λ - syy, sxy) provided sxy is nonzero.
+        double epsilon = std::numeric_limits<double>::epsilon();
+        double v1_x, v1_y, v2_x, v2_y;
+        if (std::abs(sxy) > epsilon) {
+            v1_x = eigvalmax - syy;
+            v1_y = sxy;
+            v2_x = eigvalmin - syy;
+            v2_y = sxy;
+        } else {
+            // Diagonal matrix: choose standard unit vectors.
+            if (sxx >= syy) {
+                v1_x = 1.0; v1_y = 0.0;
+                v2_x = 0.0; v2_y = 1.0;
+            } else {
+                v1_x = 0.0; v1_y = 1.0;
+                v2_x = 1.0; v2_y = 0.0;
+            }
+        }
+        // Normalize eigenvectors.
+        double norm1 = std::sqrt(v1_x * v1_x + v1_y * v1_y);
+        double norm2 = std::sqrt(v2_x * v2_x + v2_y * v2_y);
+        if (norm1 > epsilon) {
+            v1_x /= norm1;
+            v1_y /= norm1;
+        }
+        if (norm2 > epsilon) {
+            v2_x /= norm2;
+            v2_y /= norm2;
+        }
+
+	return {eigvalmax, eigvalmin, v1_x, v1_y, v2_x, v2_y};
+}
+
+
+std::vector<double> Model::stress_criterion() {
+        unsigned best_i = 0;
+        unsigned best_n = 0;
+        std::vector<double> best_eigdirmax = {0.0, 0.0};
+        double best_ratio = -std::numeric_limits<double>::infinity();
+
+        for (unsigned i = 0; i < nphases_index.size(); ++i) {
+            unsigned n = nphases_index[i];
+            double sxx = cSxx[i];
+            double sxy = cSxy[i];
+            double syy = cSyy[i];
+
+            std::vector<double> eigen_results = compute_eigen(sxx, sxy, syy);
+            double eigvalmax = eigen_results[0];
+            double eigvalmin = eigen_results[1];
+            // eigen_results[2] and eigen_results[3] form the eigenvector for eigvalmax
+
+            // Compute the ratio; (assumes eigvalmin is nonzero)
+            double ratio = eigvalmax / eigvalmin;
+
+            if (ratio > best_ratio) {
+                best_ratio = ratio;
+                best_i = i;
+                best_n = n;
+                best_eigdirmax = {eigen_results[2], eigen_results[3]};
+            }
+        }
+	 double angle = std::atan2(best_eigdirmax[1], best_eigdirmax[0]);
+        // Return the result as a list of doubles:
+        // best phase index, corresponding n, eigenvector for the maximum eigenvalue (x and y components)
+        return {static_cast<double>(best_i), static_cast<double>(best_n),angle};
+                // best_eigdirmax[0], best_eigdirmax[1]};
+    }
+
+
 void Model::proliferate(unsigned t){
 
-  /*
-  unsigned n;
-  for(unsigned i=0; i<nphases_index.size(); ++i){
-  n = nphases_index[i];
-  if( com[i][2] > (wall_thickness + 1.5 * R) ){
-  KillCell(n,i);
-  }
-  }
-  */
-    
 	if(proliferate_bool and t > prolif_start and remainder(tau_divide*1.,prolif_freq)==0. and nphases_index.size()*1. < nphases_max){
-	       //cout<<"init nphases: "<<nphases<<endl;
+		std::vector<double> pre_prolif_info = stress_criterion();
+		unsigned i = static_cast<unsigned>(pre_prolif_info[0]);
+		unsigned n = static_cast<unsigned>(pre_prolif_info[1]);
 		GetFromDevice();
 		FreeDeviceMemoryCellBirth();
-		int imax = nphases_index.size() - 1;
-		unsigned i = random_int_uniform(0,imax);
-		//unsigned i = 1;
-		unsigned n = nphases_index[i];
+		//int imax = nphases_index.size() - 1;
+		//unsigned i = random_int_uniform(0,imax);
+		//unsigned n = nphases_index[i];
 		cout<<"dividing cell "<<n<<" with index "<<i<<endl;
-		//print_new_cell_props();
-		initDivision(n,i);
-		//print_new_cell_props();
-		//cout<<"initDivision was successful "<<endl;
+		initDivision(n,i,pre_prolif_info[2]);
 		nphases = nphases_index.size();
 		nphases_index_head = nphases - 1;
 		AllocDeviceMemoryCellBirth();
 		PutToDevice();
-		//Write_visData(t);
 		cout<<"proliferation complete; current number at "<<nphases<<endl;
 		tau_divide = 0;
 	}

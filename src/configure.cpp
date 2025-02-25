@@ -94,38 +94,27 @@ void Model::AddCell(unsigned n, const coord& center)
 
 }
 
-void Model::AddCellMix(unsigned n, const coord& center, double zetaSi, double zetaQi, double gami, double omegai, double omega_walli, double kappai, double mui, double alphai, double xii, double Ri, double cellType)
+void Model::AddCellMix(unsigned n, const coord& center)
 {
   // update patch coordinates
   patch_min[n] = (center+Size-patch_margin)%Size;
   patch_max[n] = (center+patch_margin-1u)%Size;
-  //cout<<n<<" "<<center<<endl;
   // init polarisation and nematic
   theta_pol[n] = noise*Pi*(1-2*random_real());
   polarization[n] = { Spol*cos(theta_pol[n]), Spol*sin(theta_pol[n]) };
   //theta_nem[n] = noise*Pi*(1-2*random_real());
   //Q00[n] = Snem*cos(2*theta_nem[n]);
   //Q01[n] = Snem*sin(2*theta_nem[n]);
-  // cout<<"init: "<<n<<" "<<center<<endl;
   // create the cells at the centers we just computed
   for(unsigned q=0; q<patch_N; ++q)
     AddCellAtNode(n, q, center);
 
   com[n]   = vec<double, 3>(center);
-  //gams[n] = gami;
-  //zetaS_field[n] = zetaSi;
-  //zetaQ_field[n] = zetaQi;
-  //omega_ccs[n] = omegai;
-  //omega_cws[n] = omega_walli;
-  //kappas[n] = kappai;
-  //mus[n] = mui;
-  //Rs[n] = Ri;
-  //V0[n] = (4./3.)*Pi*Ri*Ri*Ri;
-  //alphas[n] = alphai;
-  //xis[n] = xii;
-  //cellTypes[n] = cellType;
- //  cout<<n<<" "<<gams[n]<<" "<<zetaS_field[n]<<" "<<zetaQ_field[n]<<" "<<omega_ccs[n]<<" "<<omega_cws[n]<<" "<<kappas[n]<<" "<<mus[n]<<" "<<Rs[n]<<" "<<V0[n]<<" "<<alphas[n]<<" "<<xis[n]<<endl;
-
+  stored_gam[n] = gam;
+  stored_omega_cc[n] = omega_cc;
+  stored_omega_cs[n] = omega_cs;
+  stored_alpha[n] = alpha;
+  stored_dpol[n] = Dpol;
 
 }
 
@@ -140,49 +129,9 @@ void Model::Configure()
     fstream file(fname);
     for (unsigned n = 0 ; n < nphases_init ; n++){
     file >> xcoor >> ycoor >> zcoor;
-      // xc,yc,zcoor,zetas1,zetaQ,gam1,omega,omega_wall,kappa,mu,alpha,xi,R
-     AddCellMix(n,{xcoor,ycoor,zcoor},zetaS,zetaQ,gam,omega_cc,omega_cs,kappa_cc,mu,alpha,xi,R,1);
+     AddCellMix(n,{xcoor,ycoor,zcoor});
     }
   }  
-  
-  /*
-  else if(init_config=="input const" && BC == 3)
-  {
-    string fname = "input_str.dat";
-    double xcoor, ycoor, zcoor, zetaSi, zetaQi, gami, omegai, kappai, mui, Ri, omega_walli,alphai,xii;
-    fstream file(fname);
-    for (unsigned n = 0 ; n < nphases ; n++){
-    file >> xcoor >> ycoor >> zcoor >> zetaSi >> zetaQi >> gami >> omegai >> omega_walli >> kappai >> mui >> alphai >> xii >> Ri;
-     AddCellMix(n,{xcoor+2.*wall_thickness,ycoor+2.*wall_thickness,zcoor}, zetaS, zetaQ, gam, omega, wall_omega, kappa, mu, alpha, xi, R,1);// extends boundaries for walls
-    }
-  } 
-  */
-  
-  /*
-  else if(init_config=="input mix" && BC != 3)
-  {
-    string fname = "input_str.dat";
-    double cellType, xcoor, ycoor, zcoor, zetaSi, zetaQi, gami, omegai, kappai, mui, Ri, omega_walli,alphai,xii;
-    fstream file(fname);
-    for (unsigned n = 0 ; n < nphases ; n++){
-    file >> cellType >> xcoor >> ycoor >> zcoor >> zetaSi >> zetaQi >> gami >> omegai >> omega_walli >> kappai >> mui >> alphai >> xii >> Ri;
-     AddCellMix(n,{xcoor,ycoor,zcoor}, zetaSi, zetaQi, gami, omegai, omega_walli, kappai, mui, alphai, xii, Ri, cellType);
-
-    }
-  }
-  
-  else if(init_config=="input mix" && BC == 3)
-  {
-    string fname = "input_str.dat";
-    double cellType, xcoor, ycoor, zcoor, zetaSi, zetaQi, gami, omegai, kappai, mui, Ri, omega_walli,alphai,xii;
-    fstream file(fname);
-    for (unsigned n = 0 ; n < nphases ; n++){
-    file >> cellType >> xcoor >> ycoor >> zcoor >> zetaSi >> zetaQi >> gami >> omegai >> omega_walli >> kappai >> mui >> alphai >> xii >> Ri;
-     AddCellMix(n,{xcoor+2.*wall_thickness,ycoor+2.*wall_thickness,zcoor}, zetaSi, zetaQi, gami, omegai, omega_walli, kappai, mui, alphai, xii, Ri,cellType);
-
-    }
-  }
-  */
 
   else throw error_msg("error: initial configuration '",
       init_config, "' unknown.");

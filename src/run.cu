@@ -167,10 +167,10 @@ void cuUpdatePotAtNode(stencil *neighbors,
 				  double kappa_cc,
 				  double mu,
 				  double lambda,
-				  double gam,
+				  double *stored_gam,
 				  double vimp,
-				  double omega_cc,
-				  double omega_cs,
+				  double *stored_omega_cc,
+				  double *stored_omega_cs,
 				  double kappa_cs,
 				  unsigned n_total,
 				  unsigned patch_N,
@@ -204,7 +204,7 @@ void cuUpdatePotAtNode(stencil *neighbors,
 	const auto ls = laplacian(sum_one, s);
 
 	const double internal = (
-	+ gam*(8*p*(1-p)*(1-2*p)/lambda - 2*lambda*ll)
+	+ stored_gam[n]*(8*p*(1-p)*(1-2*p)/lambda - 2*lambda*ll)
 	- 4*mu/vimp*(1-vol[n]/vimp)*p
 	);
 
@@ -212,11 +212,11 @@ void cuUpdatePotAtNode(stencil *neighbors,
 	// repulsion term
 	+ 2*kappa_cc/lambda*p*(sum_two[k]-p*p)
 	// adhesion term
-	- 2*omega_cc*lambda*(ls-ll)
+	- 2*stored_omega_cc[n]*lambda*(ls-ll)
 	// repulsion with walls
 	+ 2*kappa_cs/lambda*p*walls[k]*walls[k]
 	// adhesion with walls
-	- 2*omega_cs*lambda*walls_laplace[k]
+	- 2*stored_omega_cs[n]*lambda*walls_laplace[k]
 	);
 	
 	// delta F / delta phi_i
@@ -403,7 +403,7 @@ void cuUpdatePhysicalFieldsAtNode( stencil *neighbors,
 
 __global__
 void cuUpdatePolVel(
-    double alpha,
+    double *stored_alpha,
     double xi,
     vec<double,3> *Fpressure,
     vec<double,3> *Fpol,
@@ -413,7 +413,7 @@ void cuUpdatePolVel(
 {
 	const int m = blockIdx.x * blockDim.x + threadIdx.x;
 	if(m >= nphases) return;
-	Fpol[m]     = alpha * polarization[m];
+	Fpol[m]     = stored_alpha[m] * polarization[m];
 	velocity[m] = (Fpressure[m] + Fpol[m]) / xi; //add nematic+shape...
 }
 
@@ -442,7 +442,6 @@ void cuUpdatePhaseFieldAtNode(	double *phi,
 					  	cuDoubleComplex *com_x_table,
 					  	cuDoubleComplex *com_y_table,
 					  	cuDoubleComplex *com_z_table,
-					  	double alpha,
 					  	double xi,
 				  		vec<double,3> *Fpressure,
 				  		vec<double,3> *Fpol,
@@ -458,10 +457,6 @@ void cuUpdatePhaseFieldAtNode(	double *phi,
 					  	coord *offset,
 					  	unsigned n_total,
 					  	unsigned patch_N,
-					  	double Spol,
-					  	double Dpol,
-					  	double Kpol,
-					  	double Jpol,
 					  	unsigned N,
 					  	curandState *rand_states,
 					  	bool store)
@@ -545,7 +540,6 @@ void cuUpdateAtCell(			  	cuDoubleComplex *com_x,
 					  	cuDoubleComplex *com_x_table,
 					  	cuDoubleComplex *com_y_table,
 					  	cuDoubleComplex *com_z_table,
-					  	double alpha,
 					  	double xi,
 				  		vec<double,3> *Fpressure,
 				  		vec<double,3> *polarization,
@@ -559,7 +553,7 @@ void cuUpdateAtCell(			  	cuDoubleComplex *com_x,
 					  	coord *offset,
 					  	unsigned nphases,
 					  	double Spol,
-					  	double Dpol,
+					  	double *stored_dpol,
 					  	double Kpol,
 					  	double Jpol,
 					  	unsigned N,
@@ -578,7 +572,7 @@ void cuUpdateAtCell(			  	cuDoubleComplex *com_x,
 	// -----------------------------------------------------------------------------
 	// euler-marijuana update
 	if(store){
-	theta_pol_old[m] = theta_pol[m] + sqrt(time_step)*Dpol*curand_normal(&rand_states[m]);
+	theta_pol_old[m] = theta_pol[m] + sqrt(time_step)*stored_dpol[m]*curand_normal(&rand_states[m]);
 	}
 	vec<double, 3> ff = {0, 0, 0};
 	ff = Fpressure[m];
@@ -684,10 +678,10 @@ __host__ void Model::Update(bool store, unsigned t)
                              kappa_cc,
                              mu,
                              lambda,
-                             gam,
+                             d_stored_gam,
                              vimp,
-                             omega_cc,
-                             omega_cs,
+                             d_stored_omega_cc,
+                             d_stored_omega_cs,
                              kappa_cs,
                              n_total,
                              patch_N,
@@ -761,7 +755,7 @@ __host__ void Model::Update(bool store, unsigned t)
     cudaDeviceSynchronize();
 
     cuUpdatePolVel<<<nph_blocks, nph_threads>>>(
-		    alpha,
+		    d_stored_alpha,
 		    xi,
 		    d_Fpressure,
 		    d_Fpol,
@@ -800,7 +794,6 @@ __host__ void Model::Update(bool store, unsigned t)
                                  d_com_x_table,
                                  d_com_y_table,
                                  d_com_z_table,
-                                 alpha,
                                  xi,
                                  d_Fpressure,
                                  d_Fpol,
@@ -816,10 +809,6 @@ __host__ void Model::Update(bool store, unsigned t)
                                  d_offset,
                                  n_total,
                                  patch_N,
-                                 Spol,
-                                 Dpol,
-                                 Kpol,
-                                 Jpol,
                                  N,
                                  d_rand_states,
                                  store);
@@ -846,7 +835,6 @@ __host__ void Model::Update(bool store, unsigned t)
                                  d_com_x_table,
                                  d_com_y_table,
                                  d_com_z_table,
-                                 alpha,
                                  xi,
                                  d_Fpressure,
                                  d_polarization,
@@ -860,7 +848,7 @@ __host__ void Model::Update(bool store, unsigned t)
                                  d_offset,
                                  nphases,
                                  Spol,
-                                 Dpol,
+                                 d_stored_dpol,
                                  Kpol,
                                  Jpol,
                                  N,
