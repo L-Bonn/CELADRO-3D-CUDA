@@ -1,4 +1,4 @@
-![example simulation](config.gif)
+![example simulation](proliferate.gif)
 
 # Celadro-3D-CUDA
 
