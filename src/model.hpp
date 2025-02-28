@@ -279,10 +279,19 @@ enum class ManageMemory {
   double physicalprop;
   int generation;
   };
+  
+  void stress_criterionOU(unsigned, bool&, double&);
+  double UpdateOU(double tcurrent, double tmean, double tcorr, double sigma, unsigned dt);
+  void initDivisionOU(unsigned n, unsigned i, double angle, unsigned t, bool mutate);
+  std::vector<double> timer, divisiontthresh;
+  double tcorr, tmean, sigma;
+  double max_prop_val;
+  double min_prop_val;
   std::map<int, cellInfo> cellHist;
   void cellLineage(int cell_id, int parent_id, double birth_t, double death_t, double physicalprop, int gen);
   std::vector<unsigned> nphases_index;
   int tau_divide = 0;
+  double mutation_strength = 0.;
   bool proliferate_bool = true;
   unsigned prolif_start = 2000;
   unsigned prolif_freq = 2000;
@@ -293,7 +302,7 @@ enum class ManageMemory {
   void proliferate(unsigned);
   void initDivision(unsigned n, unsigned i, double angle, unsigned t);
   void BirthCellMemories(unsigned new_nphases);
-  void DivideCell(unsigned n, unsigned nphases_current, double angle);
+  void DivideCell(unsigned n, unsigned nphases_current, double angle, double cellProp);
   void BirthCell(unsigned n);
   void ComputeBirthCellCOM(unsigned n, unsigned nbirth);
   void KillCell(unsigned n, unsigned i);
@@ -425,6 +434,8 @@ enum class ManageMemory {
   double random_uniform();
   /** Return random real, gaussian distributed */
   double random_normal(double sigma=1.);
+  /** Return random uniform double */
+  double random_double_uniform(double min, double max);
 
   /** Return geometric dist numbers, prob is p */
   unsigned random_geometric(double p);

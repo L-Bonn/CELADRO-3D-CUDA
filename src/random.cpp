@@ -72,3 +72,7 @@ double Model::random_uniform()
 int Model::random_int_uniform(int min, int max){
 return uniform_int_distribution<>(min, max)(gen);
 }
+
+double Model::random_double_uniform(double min, double max) {
+    return std::uniform_real_distribution<double>(min, max)(gen);
+}

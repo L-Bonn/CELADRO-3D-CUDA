@@ -165,8 +165,14 @@ void Model::SetCellNumber(unsigned new_nphases)
   stored_omega_cs.resize(nphases,0.);
   stored_alpha.resize(nphases,0.);
   stored_dpol.resize(nphases,0.);
+  timer.resize(nphases,0.);
+  // divisiontthresh.resize(nphases,0.);
   
-  
+divisiontthresh.resize(nphases);
+std::generate(divisiontthresh.begin(), divisiontthresh.end(), [this]() {
+    return random_double_uniform(prolif_start, 1000.0 * prolif_start);
+});
+
     
   //theta_nem.resize(nphases, 0.);
   /*

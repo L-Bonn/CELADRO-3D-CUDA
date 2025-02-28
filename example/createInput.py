@@ -23,7 +23,7 @@ def fRand(fMin, fMax):
 def write_simCard(config, gamma, omegacc, omegacw, alpha, nsteps, ninfo, Lx, Ly, Lz,
                     nsubsteps, bc, margin, relax_time, nphases_init,nphases_max, mu, lambda_, kappa,
                     rad, xi, wallThich, wallKappa, SPOL, DPOL, JPOL, KPOL,
-                    zetaS, zetaQ, SNEM, KNEM, JNEM, WNEM,prolif_start,prolif_freq,prolif, count):
+                    zetaS, zetaQ, SNEM, KNEM, JNEM, WNEM,prolif_start,prolif_freq,prolif,mutation_strength,maxval,minval,tcorr,tmean,sigma,count):
     """
     Write the simulation card file with the given parameters.
     """
@@ -55,6 +55,12 @@ def write_simCard(config, gamma, omegacc, omegacw, alpha, nsteps, ninfo, Lx, Ly,
         f.write(f"prolif_start = {prolif_start}\n")
         f.write(f"prolif_freq = {prolif_freq}\n")
         f.write(f"proliferate = {prolif}\n")
+        f.write(f"mutation_strength = {mutation_strength}\n")
+        f.write(f"max_prop_val = {maxval}\n")
+        f.write(f"min_prop_val = {minval}\n")
+        f.write(f"time_corr_OU = {tcorr}\n")
+        f.write(f"tmean_OU = {tmean}\n")
+        f.write(f"sigma_OU = {sigma}\n")
         f.write(f"alpha = {alpha}\n")
         f.write(f"S-pol = {SPOL}\n")
         f.write(f"D-pol = {DPOL}\n")
@@ -215,10 +221,10 @@ def compute_all_dist(index, ix, iy, iz, txc, tyc, tzc):
 def main():
     # Simulation parameters
     nsteps = 3000
-    ninfo = 10
+    ninfo = 5
     Lz = int(40.0)
 
-    ncells = 9   # total number of cells (e.g., 9 => 3x3 grid)
+    ncells = 25   # total number of cells (e.g., 9 => 3x3 grid)
     R0 = 8.0
     rad = R0
     lbox = 2 * R0
@@ -226,20 +232,23 @@ def main():
     Lx = int(nsqrt * lbox)
     Ly = int(nsqrt * lbox)
 
-    nsubsteps = 10
+    nsubsteps = 5
     bc = 2
     margin = int(18.0)
-    relax_time = 10
+    relax_time = 100
     wall_thickness = 7.0
     zcoor = int(wall_thickness + R0/2.0)
 
-    gamma = 0.008
+    gamma = 0.007
     omegacc = 0.001
     omegacw = 0.0025
     alpha = 0.05
     xi = 1.0
     zetaS = 0.0
     zetaQ = 0.0
+    tcorr = 10000;
+    tmean = 2000;
+    sigma = 2.;# sigma * sqrt(tcorr/2) = standard deviation 
 
     mu = 45.0
     lambda_ = 3.0
@@ -254,9 +263,12 @@ def main():
     JPOL = 0.005
     KPOL = 0.001
     DPOL = 0.01
-    prolif_start = 500;
-    prolif_freq = 500;
-    prolif = 'true'
+    prolif_start = 2000;
+    prolif_freq = 1000;
+    prolif = 'false';
+    mutation_strength = +0.1;
+    max_prop_val = 0.009
+    min_prop_val = 0.005
 
     global d_max_mc
     d_max_mc = 1.0
@@ -346,7 +358,7 @@ def main():
                                                           margin, relax_time, nphases_init,nphases_max, mu, lambda_,
                                                           kappa, rad, xi, wall_thickness, wall_kappa,
                                                           SPOL, DPOL, JPOL, KPOL, zetaS, zetaQ,
-                                                          SNEM, KNEM, JNEM, WNEM,prolif_start,prolif_freq,prolif, count)
+                                                          SNEM, KNEM, JNEM, WNEM,prolif_start,prolif_freq,prolif,mutation_strength,max_prop_val,min_prop_val,tcorr,tmean,sigma, count)
 
                                             # You can compute ratios if needed:
                                             ratio_a = OMEGACC_A / OMEGACC_B if OMEGACC_B != 0 else None

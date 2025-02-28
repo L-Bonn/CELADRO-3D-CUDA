@@ -34,6 +34,7 @@ __host__ __device__ inline double cuCarg(cuDoubleComplex z)
 }
 
 
+
 void Model::Pre()
 {
 
@@ -224,6 +225,7 @@ void cuUpdatePotAtNode(stencil *neighbors,
 	// pressure
 	// atomicAdd(&field_press[k],p*interactions);
 	field_press[k] += p*interactions;
+	
 	
 	// -----------------------------------------------------------------------------
 	// compute stress field 

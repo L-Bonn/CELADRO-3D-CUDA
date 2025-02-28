@@ -94,6 +94,12 @@ void Model::ParseProgramOptions(int ac, char **av)
       "Interface thickness parameter")
     ("kappa_cc", opt::value<double>(&kappa_cc),
       "Interaction strength")
+    ("max_prop_val", opt::value<double>(&max_prop_val),
+      "max expression of property")
+    ("min_prop_val", opt::value<double>(&min_prop_val),
+      "min expression of property")
+    ("mutation_strength", opt::value<double>(&mutation_strength),
+      "mutation strength")
     ("nphases_init", opt::value<unsigned>(&nphases_init),
       "initial number of cells")
     ("nphases_max", opt::value<unsigned>(&nphases_max),
@@ -102,6 +108,12 @@ void Model::ParseProgramOptions(int ac, char **av)
       "start timestep for proliferation")
     ("prolif_freq", opt::value<unsigned>(&prolif_freq),
       "frequency of proliferation")
+    ("time_corr_OU", opt::value<double>(&tcorr),
+      "time correlation for OU process")// sigma * sqrt(tcorr/2) = standard deviation 
+    ("tmean_OU", opt::value<double>(&tmean),
+      "mean time for OU process")
+    ("sigma_OU", opt::value<double>(&sigma),
+      "strength of noise for OU process")
     ("proliferate", opt::value<bool>(&proliferate_bool)->default_value(true),
     "Enable cell proliferation (true or false)")
     ("npc", opt::value<unsigned>(&npc)->default_value(1u),
@@ -243,10 +255,14 @@ void Model::ParseProgramOptions(int ac, char **av)
 
   // compute effective time step
   time_step = 1./nsubsteps;
+  // max_prop_val = gam;
+  // min_prop_val = gam;
   
   nphases = nphases_init;
   nphases_index_head = nphases-1;
   GlobalCellIndex = nphases-1;
+  //prolif_start *= nsubsteps*ninfo;
+  //prolif_freq *= nsubsteps*ninfo;
 
   // set nstart to the next correct frame (round above)
   if(nstart%ninfo) nstart = (1u+nstart/ninfo)*ninfo;
