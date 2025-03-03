@@ -59,7 +59,7 @@ def write_simCard(config, gamma, omegacc, omegacw, alpha, nsteps, ninfo, Lx, Ly,
         f.write(f"max_prop_val = {maxval}\n")
         f.write(f"min_prop_val = {minval}\n")
         f.write(f"time_corr_OU = {tcorr}\n")
-        f.write(f"tmean_OU = {tmean}\n")
+        #f.write(f"tmean_OU = {tmean}\n")
         f.write(f"sigma_OU = {sigma}\n")
         f.write(f"alpha = {alpha}\n")
         f.write(f"S-pol = {SPOL}\n")
@@ -235,7 +235,7 @@ def main():
     nsubsteps = 5
     bc = 2
     margin = int(18.0)
-    relax_time = 100
+    relax_time = 10
     wall_thickness = 7.0
     zcoor = int(wall_thickness + R0/2.0)
 
@@ -246,7 +246,7 @@ def main():
     xi = 1.0
     zetaS = 0.0
     zetaQ = 0.0
-    tcorr = 10000;
+    tcorr = 5;
     tmean = 2000;
     sigma = 2.;# sigma * sqrt(tcorr/2) = standard deviation 
 
@@ -263,9 +263,9 @@ def main():
     JPOL = 0.005
     KPOL = 0.001
     DPOL = 0.01
-    prolif_start = 2000;
-    prolif_freq = 1000;
-    prolif = 'false';
+    prolif_start = 20;
+    prolif_freq = 100;
+    prolif = 'true';
     mutation_strength = +0.1;
     max_prop_val = 0.009
     min_prop_val = 0.005
