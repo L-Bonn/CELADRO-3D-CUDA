@@ -110,8 +110,8 @@ void Model::ParseProgramOptions(int ac, char **av)
       "frequency of proliferation")
     ("time_corr_OU", opt::value<double>(&tcorr),
       "time correlation for OU process")// sigma * sqrt(tcorr/2) = standard deviation 
-    ("tmean_OU", opt::value<double>(&tmean),
-      "mean time for OU process")
+    //("tmean_OU", opt::value<double>(&tmean),
+    //  "mean time for OU process")
     ("sigma_OU", opt::value<double>(&sigma),
       "strength of noise for OU process")
     ("proliferate", opt::value<bool>(&proliferate_bool)->default_value(true),
@@ -261,8 +261,12 @@ void Model::ParseProgramOptions(int ac, char **av)
   nphases = nphases_init;
   nphases_index_head = nphases-1;
   GlobalCellIndex = nphases-1;
-  //prolif_start *= nsubsteps*ninfo;
-  //prolif_freq *= nsubsteps*ninfo;
+  
+  // tmean *= nsubsteps*2;
+  tcorr *= nsubsteps*2;
+  prolif_freq *= nsubsteps*2;
+  prolif_start *= nsubsteps*2;
+
 
   // set nstart to the next correct frame (round above)
   if(nstart%ninfo) nstart = (1u+nstart/ninfo)*ninfo;

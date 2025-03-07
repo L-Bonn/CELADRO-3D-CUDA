@@ -30,6 +30,11 @@ double Model::random_normal(double sigma)
   return normal_distribution<>(0., sigma)(gen);
 }
 
+double Model::random_normal_full(double mean, double sigma)
+{
+  return normal_distribution<>(mean, sigma)(gen);
+}
+
 unsigned Model::random_geometric(double p)
 {
   return geometric_distribution<>(p)(gen);

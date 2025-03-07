@@ -71,7 +71,7 @@ void Model::Write_COM(unsigned t){
     FILE * sortie;
     sortie = fopen(cname, "a");    
   
-  for(unsigned n=nstart; n<nphases; ++n)
+  for(unsigned n=0; n<nphases_index.size(); ++n)
   {
     // cout<<t<<" "<<com[0][0]<<" "<<com[0][1]<<" "<<com[0][2]<<endl;   
     fprintf( sortie,"%u %.4e %.4e %.4e \n",t,com[n][0],com[n][1],com[n][2]);      
@@ -79,6 +79,30 @@ void Model::Write_COM(unsigned t){
     fclose(sortie);    
   
 }
+
+
+
+void Model::Write_OU(unsigned t) {
+    const std::string fname = "OU.dat";
+    FILE* sortie = fopen(fname.c_str(), "a");
+    if (!sortie) {
+        perror("fopen");
+        return;
+    }
+
+    // Write a header line with the current timestep and number of particles
+    size_t nphases = nphases_index.size();
+    fprintf(sortie, "%u %zu\n", t, nphases);
+
+    // Write the data for each particle (each particle gets an index i from 0 to nphases-1)
+    for (size_t i = 0; i < nphases; i++) {
+        fprintf(sortie, "  %.4e %.4e\n", timer[i], divisiontthresh[i]);
+    }
+    
+    fclose(sortie);
+}
+
+
 
 
 void Model::Write_contArea(unsigned t){
@@ -196,7 +220,7 @@ void Model::Write_velocities(unsigned t){
     FILE * sortie;
     sortie = fopen(cname, "a");    
   
-  for(unsigned n=nstart; n<nphases; ++n)
+  for(unsigned n=0; n<nphases_index.size(); ++n)
   {
         
     fprintf(sortie,"%u %.4e %.4e %.4e\n",t,velocity[n][0],velocity[n][1],velocity[n][2]);      
@@ -235,7 +259,7 @@ void Model::WriteFrame(unsigned t)
       // serialize
       SerializeFrame(ar);
 
-      if(ar.bad_value()) throw error_msg("nan found while writing file.");
+     if(ar.bad_value()) throw error_msg("nan found while writing file.");
     }
     // dump to file
     std::ofstream ofs(oname.c_str(), ios::out);
@@ -268,7 +292,7 @@ void Model::WriteParams()
       // ...and model parameters
       SerializeParameters(ar);
 
-      if(ar.bad_value()) throw error_msg("nan found while writing file.");
+     if(ar.bad_value()) throw error_msg("nan found while writing file.");
     }
     // dump to file
     std::ofstream ofs(oname.c_str(), ios::out);

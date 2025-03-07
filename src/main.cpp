@@ -55,6 +55,8 @@ void Model::Algorithm()
       try
       {
         WriteFrame(t);
+        // Write_OU(t);
+        // print_new_cell_props();
         if (proliferate_bool) write_cellHist_binary("cellHist.bin", t, cellHist);
         // Write_COM(t);
         // Write_visData(t);
@@ -74,6 +76,7 @@ void Model::Algorithm()
 
     // some verbose
     if(verbose>1) cout << '\n';
+    
     if(verbose)
       cout << "timesteps t = " << setw(pad) << setfill(' ') << right
                                  << t << " to "
@@ -87,10 +90,10 @@ void Model::Algorithm()
       // first sweeps produces estimate of values
       // subsequent sweeps produce corrected values
     	for(unsigned i=0; i<=npc; ++i){
-    	       cuCheck++;
-    	       // visTMP(cuCheck);
-    	       unsigned tstep = (i + streak_length * s + streak_length * npc * t);
-        	Update(i==0,tstep);
+    	       //unsigned tstep = (i + streak_length * s + streak_length * npc * t);
+        	Update(i==0,globalT);
+        	globalT++;
+        	// cout<<globalT<<endl;
         	}
     }
 
@@ -117,6 +120,7 @@ void Model::Algorithm()
 
   // finally write final frame
   if(!no_write and nsteps>=nstart) WriteFrame(nsteps);
+  // if(!no_write and nsteps>=nstart) Write_OU(nsteps);
   if (proliferate_bool and !no_write and nsteps >= nstart) write_cellHist_binary("cellHist.bin", nsteps, cellHist);
   // if(!no_write and nsteps>=nstart) Write_COM(nsteps);	
   // if(!no_write and nsteps>=nstart) Write_velocities(nsteps);	

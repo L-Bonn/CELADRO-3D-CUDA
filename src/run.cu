@@ -133,8 +133,11 @@ void cuUpdateSumsAtNode(	   double *phi,
 	atomicAdd(&field_vely[k],p*velocity[n][1]);
 	atomicAdd(&field_velz[k],p*velocity[n][2]);
 	*/
-	sum_one[k] += p;
-	sum_two[k] += p*p;
+	//sum_one[k] += p;
+	//sum_two[k] += p*p;
+	atomicAdd(&sum_one[k], p);
+	atomicAdd(&sum_two[k], p * p);
+
 	field_polx[k] += p*polarization[n][0];
 	field_poly[k] += p*polarization[n][1];
 	field_polz[k] += p*polarization[n][2];
@@ -419,6 +422,103 @@ void cuUpdatePolVel(
 	velocity[m] = (Fpressure[m] + Fpol[m]) / xi; //add nematic+shape...
 }
 
+/*
+__device__ void atomicAddCX(cuDoubleComplex *addr, cuDoubleComplex value) {
+    double *real_ptr = &(addr->x);
+    double *imag_ptr = &(addr->y);
+    atomicAdd(real_ptr, value.x);
+    atomicAdd(imag_ptr, value.y);
+}
+
+__global__
+void cuUpdatePhaseFieldAtNode(double *phi, 
+                             double *phi_dx,
+                             double *phi_dy,
+                             double *phi_dz,
+                             double *dphi,
+                             double *dphi_old,
+                             double *phi_old,
+                             double *sum_one, 
+                             double *sum_two,
+                             double *field_press,
+                             double *field_velx,
+                             double *field_vely,
+                             double *field_velz,
+                             double *vol,
+                             double *V,
+                             cuDoubleComplex *com_x,
+                             cuDoubleComplex *com_y,
+                             cuDoubleComplex *com_z,
+                             double time_step,
+                             cuDoubleComplex *com_x_table,
+                             cuDoubleComplex *com_y_table,
+                             cuDoubleComplex *com_z_table,
+                             double xi,
+                             vec<double,3> *Fpressure,
+                             vec<double,3> *Fpol,
+                             vec<double,3> *velocity,
+                             vec<double,3> *polarization,
+                             vec<double,3> *com,
+                             coord patch_size,
+                             coord *patch_min,
+                             coord *patch_max,
+                             coord patch_margin,
+                             coord Size,
+                             coord *offset,
+                             unsigned n_total,
+                             unsigned patch_N,
+                             unsigned N,
+                             curandState *rand_states,
+                             bool store)
+{
+    const int m = blockIdx.x * blockDim.x + threadIdx.x;
+    if (m >= n_total) return;
+
+    unsigned n = static_cast<unsigned>(m) / patch_N;
+    unsigned q = static_cast<unsigned>(m) % patch_N;
+
+    const coord qpos = { (q / patch_size[1]) % patch_size[0], q % patch_size[1], q / (patch_size[0] * patch_size[1]) };
+    const coord dpos = ((qpos + offset[n]) % patch_size + patch_min[n]) % Size;
+    const auto k = dpos[1] + Size[1] * dpos[0] + Size[0] * Size[1] * dpos[2];
+    double p = phi[m];
+
+    dphi[m] = -V[m] - velocity[n][0] * phi_dx[m] - velocity[n][1] * phi_dy[m] - velocity[n][2] * phi_dz[m];
+
+    if (store) {
+        dphi_old[m] = dphi[m];
+        phi_old[m] = phi[m];
+    }
+    
+
+    p = phi_old[m] + time_step * 0.5 * (dphi[m] + dphi_old[m]);
+    phi[m] = p;
+
+    unsigned idx = (k / Size[1]) % Size[0];
+    unsigned idy = k % Size[1];
+    unsigned idz = k / (Size[0] * Size[1]);
+
+    const auto cp = make_cuDoubleComplex(p, 0.);
+    const auto cmx = cuCmul(com_x_table[idx], cp);
+    const auto cmy = cuCmul(com_y_table[idy], cp);
+    const auto cmz = cuCmul(com_z_table[idz], cp);
+
+    atomicAddCX(&com_x[n], cmx);
+    atomicAddCX(&com_y[n], cmy);
+    atomicAddCX(&com_z[n], cmz);
+
+    atomicAdd(&vol[n], p * p);
+
+    sum_one[k] = 0;
+    sum_two[k] = 0;
+    field_press[k] = 0;
+    field_velx[k] = 0;
+    field_vely[k] = 0;
+    field_velz[k] = 0;
+}
+*/
+
+
+                                 
 __global__
 void cuUpdatePhaseFieldAtNode(	double *phi, 
 					  	double *phi_dx,
@@ -438,8 +538,6 @@ void cuUpdatePhaseFieldAtNode(	double *phi,
 					  	cuDoubleComplex *com_x,
 					  	cuDoubleComplex *com_y,
 					  	cuDoubleComplex *com_z,
-					  	double *theta_pol,
-					  	double *theta_pol_old,
 					  	double time_step,
 					  	cuDoubleComplex *com_x_table,
 					  	cuDoubleComplex *com_y_table,
@@ -450,7 +548,6 @@ void cuUpdatePhaseFieldAtNode(	double *phi,
 				  		vec<double,3> *velocity,
 				  		vec<double,3> *polarization,
 				  		vec<double,3> *com,
-				  		double *delta_theta_pol,
 					  	coord patch_size,
 					  	coord *patch_min,
 					  	coord *patch_max,
@@ -462,11 +559,11 @@ void cuUpdatePhaseFieldAtNode(	double *phi,
 					  	unsigned N,
 					  	curandState *rand_states,
 					  	bool store)
-					  	/*
-					  	double *field_polx,
-						double *field_poly,
-						double *field_polz)
-						*/
+					  	
+					  	// double *field_polx,
+						// double *field_poly,
+						// double *field_polz)
+						
 {
 
 	
@@ -486,16 +583,16 @@ void cuUpdatePhaseFieldAtNode(	double *phi,
     - velocity[n][0]*phi_dx[m] - velocity[n][1]*phi_dy[m] - velocity[n][2]*phi_dz[m];
     ;
 
-
   if(store)
   {
     dphi_old[m] = dphi[m];
     phi_old[m]  = phi[m];
   }
   
+  
     p = phi_old[m]
                + time_step*.5*(dphi[m] + dphi_old[m]);
-
+    
     phi[m]    = p;
 
     unsigned idx = (k/Size[1])%Size[0];
@@ -522,13 +619,10 @@ void cuUpdatePhaseFieldAtNode(	double *phi,
   field_velx[k] = 0;
   field_vely[k] = 0;
   field_velz[k] = 0;
-  /*
-  field_polx[k] = 0;
-  field_poly[k] = 0;
-  field_polz[k] = 0;
-  */
   
-  
+  // field_polx[k] = 0;
+  // field_poly[k] = 0;
+  // field_polz[k] = 0;
 }
 
 
@@ -626,6 +720,28 @@ __host__ void Model::Update(bool store, unsigned t)
     nph_total   = static_cast<int>(nphases_index.size());
     nph_blocks  = (nph_total + ThreadsPerBlock - 1) / ThreadsPerBlock;
     nph_threads = ThreadsPerBlock;
+    
+    /*
+   // STEP 1: Allocate host buffer for copying data back
+    vector<double> h_phi_old_flat(nphases_index.size() * patch_N, 0.0);
+
+    // STEP 2: Copy device memory (d_phi_old) to host buffer
+    cudaMemcpy(h_phi_old_flat.data(), d_phi_old, 
+               nphases_index.size() * patch_N * sizeof(double), 
+               cudaMemcpyDeviceToHost);
+
+    // STEP 3: Print values to check for NaNs or unexpected values
+    cout << "Printing : "<< t<<endl;
+    for (unsigned n = 0; n < nphases_index.size(); ++n) {
+        for (unsigned q = 0; q < patch_N; ++q) {
+            double ss = h_phi_old_flat[n * patch_N + q];
+            if (isnan(ss)) {
+                cout << "NaN detected at (n=" << n << ", q=" << q << ") -> Value: " << ss << endl;
+            }
+            // cout << "d_phi_old[" << n << "][" << q << "] = " << ss << endl;
+        }
+    }
+    */
     
      
     cudaError_t err = cudaGetLastError();
@@ -790,8 +906,6 @@ __host__ void Model::Update(bool store, unsigned t)
                                  d_com_x,
                                  d_com_y,
                                  d_com_z,
-                                 d_theta_pol,
-                                 d_theta_pol_old,
                                  time_step,
                                  d_com_x_table,
                                  d_com_y_table,
@@ -802,7 +916,6 @@ __host__ void Model::Update(bool store, unsigned t)
                                  d_velocity,
                                  d_polarization,
                                  d_com,
-                                 d_delta_theta_pol,
                                  patch_size,
                                  d_patch_min,
                                  d_patch_max,

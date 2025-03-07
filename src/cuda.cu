@@ -27,6 +27,7 @@ using namespace std;
 //---------------------------------------------------------------------
 // Typed malloc/free on device memory
 //---------------------------------------------------------------------
+/*
 template<class T>
 void malloc_or_free(T*& ptr, size_t len, Model::ManageMemory which)
 {
@@ -35,10 +36,11 @@ void malloc_or_free(T*& ptr, size_t len, Model::ManageMemory which)
     else
         cudaFree(ptr);
 }
-
+*/
 //---------------------------------------------------------------------
 // Typed memcpy to device memory (bidirectional)
 //---------------------------------------------------------------------
+
 template<class T, class U>
 void bidirectional_memcpy(T* device, U* host, size_t len, Model::CopyMemory dir) {
     if (dir == Model::CopyMemory::HostToDevice)
@@ -47,14 +49,27 @@ void bidirectional_memcpy(T* device, U* host, size_t len, Model::CopyMemory dir)
         cudaMemcpy(static_cast<void*>(host), device, len * sizeof(T), cudaMemcpyDeviceToHost);
 }
 
+template<class T>
+void malloc_or_free(T*& ptr, size_t len, Model::ManageMemory which) {
+    if (which == Model::ManageMemory::Allocate) {
+        if (cudaMalloc((void**)&ptr, len * sizeof(T)) != cudaSuccess) {
+            std::cerr << "CUDA malloc failed!" << std::endl;
+            exit(EXIT_FAILURE);
+        }
+    } else {
+        if (ptr) {
+            cudaFree(ptr);
+            ptr = nullptr;
+        }
+    }
+}
 // -----------------------------------------------------------------------------
 // cuda-related functions 
 // -----------------------------------------------------------------------------
 
 // Kernel to seed the random number generator states.
 // Note: The thread id now accounts for block index.
-__global__
-static void seed_rand(curandState *state, unsigned long seed)
+__global__ void seed_rand(curandState *state, unsigned long seed)
 {
     int id = threadIdx.x + blockIdx.x * blockDim.x;
     curand_init(seed, id, 0, &state[id]);
@@ -374,7 +389,7 @@ void Model::QueryDeviceProperties()
     cout << "    ... constant memory:      " << DeviceProperties.totalConstMem / kb << "kb" << endl;
     cout << "    ... block registers:      " << DeviceProperties.regsPerBlock << endl;
     cout << "    ... warp size:            " << DeviceProperties.warpSize << endl;
-    cout << "    ... threads per block:    " << DeviceProperties.maxThreadsPerBlock << endl;
+    cout << "    ... max threads per block:    " << DeviceProperties.maxThreadsPerBlock << endl;
     cout << "    ... max block dimensions: [ " << DeviceProperties.maxThreadsDim[0]
          << ", " << DeviceProperties.maxThreadsDim[1] << ", " << DeviceProperties.maxThreadsDim[2] << " ]" << endl;
     cout << "    ... max grid dimensions:  [ " << DeviceProperties.maxGridSize[0]

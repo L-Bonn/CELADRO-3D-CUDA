@@ -25,7 +25,7 @@ void Model::print_new_cell_props(){
   unsigned n;
   for(unsigned i=0; i<nphases_index.size(); ++i){
   n = nphases_index[i];
-  cout<<"n :"<<n<<" i: "<<i<<" "<<divisiontthresh[i]<<endl;
+  cout<<"n :"<<n<<" i: "<<i<<" "<<divisiontthresh[i]<<" "<<timer[i]<<endl;
   }
 }
 
@@ -72,6 +72,9 @@ void Model::BirthCellMemories(unsigned new_nphases){
   stored_alpha.resize(new_nphases,0.);
   stored_dpol.resize(new_nphases,0.);
   
+  timer.resize(new_nphases,0.);
+  divisiontthresh.resize(new_nphases,0.);  
+  stored_tmean.resize(new_nphases,0.);
   /*  
   S00.resize(new_nphases, 0.);
   S01.resize(new_nphases, 0.);
@@ -121,8 +124,22 @@ void Model::DivideCell(unsigned n, unsigned idx, double division_orientation, do
   timer[idx] = 0.;
   timer[idx-1] = 0.;
   
-  divisiontthresh[idx] = random_poisson(6.);//tmean
-  divisiontthresh[idx-1] = random_poisson(6.);//tmean
+  //divisiontthresh[idx] = random_normal_full(tmean,(1./4.)*tmean);//tmean
+  //divisiontthresh[idx-1] = random_normal_full(tmean,(1./4.)*tmean);//tmean
+  
+  // divisiontthresh[idx] = random_double_uniform(prolif_start*1.,prolif_start*10.);
+  // divisiontthresh[idx-1] = random_double_uniform(prolif_start*1.,prolif_start*10.);
+  
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::uniform_int_distribution<> dis(0, stored_tmean.size() - 1);
+  int random_index = dis(gen);
+  stored_tmean[idx] = stored_tmean[random_index];
+  random_index = dis(gen);
+  stored_tmean[idx-1] = stored_tmean[random_index];
+   
+  divisiontthresh[idx] = divisiontthresh[n];
+  divisiontthresh[idx-1] = divisiontthresh[n];
   
   double rndir = random_uniform();
   double px1 = px + (R)*cos(rndir);
@@ -257,6 +274,7 @@ void Model::KillCell(unsigned n, unsigned i){
 	stored_dpol.erase(stored_dpol.begin()+i);
 	timer.erase(timer.begin()+i);
 	divisiontthresh.erase(divisiontthresh.begin()+i);
+	stored_tmean.erase(stored_tmean.begin()+i);
 	
 
 }
@@ -540,21 +558,22 @@ std::vector<double> Model::stress_criterion() {
 
 
 void Model::proliferate(unsigned t){
-
-	if(proliferate_bool and t > prolif_start and nphases_index.size()*1. < nphases_max){
-	print_new_cell_props();
+	if(proliferate_bool and (t) > prolif_start and nphases_index.size()*1. < nphases_max){
+	// print_new_cell_props();
 	for (unsigned i = 0 ; i < nphases_index.size(); i++){
 	unsigned n = nphases_index[i];
-	timer[i] += t;
-	divisiontthresh[i] = UpdateOU(divisiontthresh[i],tmean,tcorr,sigma,t);
+	timer[i] += 1;
+	divisiontthresh[i] = UpdateOU(divisiontthresh[i],stored_tmean[i],tcorr,sigma,1);
+	// print_new_cell_props();
 	if (timer[i] >= divisiontthresh[i]){
 	bool mutate = false;
 	double angle = 0.;
 	stress_criterionOU(i,mutate,angle);
 	GetFromDevice();
 	FreeDeviceMemoryCellBirth();
-	cout<<"dividing cell "<<n<<" with index "<<i<<" mutation "<<mutate<<endl;
+	cout<<"dividing cell "<<n<<" with index "<<i<<" mutation "<<mutate<<" "<<timer[i]<<" "<<divisiontthresh[i]<<endl;
 	initDivisionOU(n,i,angle,t,mutate);
+	print_new_cell_props();
 	nphases = nphases_index.size();
 	nphases_index_head = nphases - 1;
 	AllocDeviceMemoryCellBirth();

@@ -18,7 +18,7 @@ set(CMAKE_CUDA_STANDARD_REQUIRED ON)
 set(CMAKE_CUDA_SEPARABLE_COMPILATION ON)
 
 # ------------------------------------------------------------------------------
-# Specify the CUDA architectures to target. Adjust as needed (e.g., 61, 70, 75).
+# Specify the CUDA architecture to target (sm_90).
 # ------------------------------------------------------------------------------
 set(CMAKE_CUDA_ARCHITECTURES 61)
 
@@ -44,12 +44,17 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
 # CUDA-specific flags
 #   -Xcompiler -std=c++14 passes -std=c++14 to the host (GCC) compiler
 #   --expt-relaxed-constexpr and --expt-extended-lambda enable newer language features
+#   -ftz=false       : Disable flush-to-zero mode (handle denormals normally)
+#   --prec-div=true  : Enforce precise division operations
+#   --prec-sqrt=true : Enforce precise square root operations
+#   --fmad=false     : Disable fused multiply-add (FMA) for exact rounding
 # ------------------------------------------------------------------------------
 set(CMAKE_CUDA_FLAGS
     "${CMAKE_CUDA_FLAGS} -arch=sm_61 \
      -Xcompiler -std=c++14 \
      --expt-relaxed-constexpr \
-     --expt-extended-lambda"
+     --expt-extended-lambda \
+     -ftz=false --prec-div=true --prec-sqrt=true --fmad=false"
 )
 
 ################################################################################

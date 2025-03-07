@@ -7,7 +7,7 @@ CUDA_DEFINES = -DBOOST_ALL_NO_LIB -DBOOST_PROGRAM_OPTIONS_DYN_LINK
 
 CUDA_INCLUDES = 
 
-CUDA_FLAGS =  -arch=sm_61      -Xcompiler -std=c++14      --expt-relaxed-constexpr      --expt-extended-lambda -O3 -DNDEBUG --generate-code=arch=compute_61,code=[compute_61,sm_61] -diag-suppress=20012 -fopenmp -std=c++14
+CUDA_FLAGS =  -arch=sm_61      -Xcompiler -std=c++14      --expt-relaxed-constexpr      --expt-extended-lambda      -ftz=false --prec-div=true --prec-sqrt=true --fmad=false -O3 -DNDEBUG --generate-code=arch=compute_61,code=[compute_61,sm_61] -diag-suppress=20012 -fopenmp -std=c++14
 
 CXX_DEFINES = -DBOOST_ALL_NO_LIB -DBOOST_PROGRAM_OPTIONS_DYN_LINK
 

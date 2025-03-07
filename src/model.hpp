@@ -268,7 +268,7 @@ enum class ManageMemory {
   /** Noise strength */
   double Dpol = 0, Dnem = 0;
   double vimp = (4./3.)*Pi*R*R*R;
-  int cuCheck = 0;
+  unsigned globalT = 0;
   
   // ===========================================================================
   // related to proliferation 
@@ -283,7 +283,7 @@ enum class ManageMemory {
   void stress_criterionOU(unsigned, bool&, double&);
   double UpdateOU(double tcurrent, double tmean, double tcorr, double sigma, unsigned dt);
   void initDivisionOU(unsigned n, unsigned i, double angle, unsigned t, bool mutate);
-  std::vector<double> timer, divisiontthresh;
+  std::vector<double> timer, divisiontthresh, stored_tmean;
   double tcorr, tmean, sigma;
   double max_prop_val;
   double min_prop_val;
@@ -293,8 +293,8 @@ enum class ManageMemory {
   int tau_divide = 0;
   double mutation_strength = 0.;
   bool proliferate_bool = true;
-  unsigned prolif_start = 2000;
-  unsigned prolif_freq = 2000;
+  unsigned prolif_start;
+  unsigned prolif_freq;
   unsigned nphases_init;
   unsigned nphases_max = 1000;
   unsigned nphases_index_head;
@@ -396,6 +396,7 @@ enum class ManageMemory {
   void Write_contArea(unsigned);
   void Write_Density(unsigned);
   void visTMP(unsigned);
+  void Write_OU(unsigned);
   
   /** Write run parameters */
   void WriteParams();
@@ -434,6 +435,8 @@ enum class ManageMemory {
   double random_uniform();
   /** Return random real, gaussian distributed */
   double random_normal(double sigma=1.);
+  /** Return random real, gaussian distributed */
+  double random_normal_full(double mean=0., double sigma=1.);
   /** Return random uniform double */
   double random_double_uniform(double min, double max);
 
