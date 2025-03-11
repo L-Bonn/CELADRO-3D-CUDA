@@ -1,7 +1,7 @@
 # Sample runcard
 config = input const
 nsteps = 3000
-ninfo = 5
+ninfo = 10
 LX = 80
 LY = 80
 LZ = 40
@@ -22,12 +22,12 @@ wall-thickness = 7.0
 kappa_cs = 0.15
 omega_cs = 0.0025
 prolif_start = 20
-prolif_freq = 100
-proliferate = false
+prolif_freq = 40
+proliferate = true
 mutation_strength = 0.1
 max_prop_val = 0.009
 min_prop_val = 0.005
-time_corr_OU = 5
+time_corr_OU = 10
 sigma_OU = 2.0
 alpha = 0.05
 S-pol = 1.0

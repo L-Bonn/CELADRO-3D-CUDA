@@ -221,7 +221,7 @@ def compute_all_dist(index, ix, iy, iz, txc, tyc, tzc):
 def main():
     # Simulation parameters
     nsteps = 3000
-    ninfo = 5
+    ninfo = 10
     Lz = int(40.0)
 
     ncells = 25   # total number of cells (e.g., 9 => 3x3 grid)
@@ -235,7 +235,7 @@ def main():
     nsubsteps = 5
     bc = 2
     margin = int(18.0)
-    relax_time = 10
+    relax_time = 50
     wall_thickness = 7.0
     zcoor = int(wall_thickness + R0/2.0)
 
@@ -247,13 +247,10 @@ def main():
     zetaS = 0.0
     zetaQ = 0.0
     tcorr = 5;
-    tmean = 2000;
     sigma = 2.;# sigma * sqrt(tcorr/2) = standard deviation 
-
     mu = 45.0
     lambda_ = 3.0
     kappa = 0.5
-
     wall_kappa = 0.15
     SPOL = 1.0
     SNEM = 0.0
@@ -263,8 +260,8 @@ def main():
     JPOL = 0.005
     KPOL = 0.001
     DPOL = 0.01
-    prolif_start = 20;
-    prolif_freq = 100;
+    prolif_start = 150;
+    prolif_freq = 75;
     prolif = 'true';
     mutation_strength = +0.1;
     max_prop_val = 0.009
@@ -278,6 +275,7 @@ def main():
     npz = 1
     nphases_init = int(ncells)
     nphases_max = 400
+    tmean = 2000;# currently not in use 
 
     print(f"Number of cells are: {nphases_init} with rad: {rad}")
 

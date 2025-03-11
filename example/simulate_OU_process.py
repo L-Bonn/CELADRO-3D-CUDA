@@ -17,12 +17,12 @@ def update_ou(tcurrent, tmean, tcorr, sigma, dt):
     return tcurrent - ((tcurrent - tmean) / tcorr) * dt + sigma * dW
 
 # Simulation parameters
-t0 = 0.0         # initial value
-tmean = 120*10      # mean
-tcorr = 1*10    # correlation/relaxation time
-sigma = 4      # volatility
+t0 = 1000.0         # initial value
+tmean = 7520      # mean
+tcorr = 5    # correlation/relaxation time
+sigma = 2      # volatility
 dt = 1.0         # discrete time step
-n_steps = 5000    # number of time steps
+n_steps = 50000    # number of time steps
 
 params = [1,2,3]
 #params = [200,500,1000]
