@@ -71,7 +71,8 @@ def VolRendering(fin,fout):
     camera = vtk.vtkCamera()
     ren1.SetActiveCamera(camera) 
     camera.SetViewUp(0,0,1);
-    camera.SetPosition(32,300,200);
+    #camera.SetPosition(800,320/2,400);
+    camera.SetPosition(32,-200,300);
     camera.SetFocalPoint(32,32,0);
     camera.Zoom(1)
     camera.SetClippingRange(.1, 12000); 
@@ -98,7 +99,7 @@ def VolRendering(fin,fout):
 
 
 print('running vtk_VolRender_05012021.py')
-rng = np.arange(1,52,1)
+rng = np.arange(1,106,1)
 #rng = [165,195,215,300]
 for fr in (rng):
     print('time step: ',fr,flush=True)

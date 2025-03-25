@@ -4,9 +4,9 @@ sys.path.insert(0, "celadro_3D_scripts_final/plot/")
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy import ndimage
-#import plot
+import plot
 import archive
-#import animation
+import animation
 import gc
 
 ##################################################
@@ -74,9 +74,10 @@ def writeVTK(fname, frame):
     p = np.zeros(N)
     p = np.reshape(p,(frame.parameters['Size'][2],frame.parameters['Size'][0],frame.parameters['Size'][1]))
     for i in range(len(frame.phi)):
-    	if (frame.com[i][2]-8) < 2. * 8:
-    		p += frame.phi[i]
-
+    	p += frame.phi[i]
+    #mode = 'wrap' if frame.parameters['BC'] == 0 else 'constant'	
+    #vx, vy, vz = get_velocity_field(frame.phi, frame.velocity, 1, mode=mode)
+    
     f = open(fname,"w+")
     f.write("# vtk DataFile Version 2.0\n");
     f.write("volume example\n");
@@ -88,12 +89,24 @@ def writeVTK(fname, frame):
     f.write("POINT_DATA  %d\n" % N);
     f.write("SCALARS volume_scalars double 1\n");       
     f.write("LOOKUP_TABLE default \n");       
+    #phi = frame.phi
 
     for z in np.arange(0,frame.parameters['Size'][2],1):
     	for x in np.arange(0,frame.parameters['Size'][0],1):
     		for y in np.arange(0,frame.parameters['Size'][1],1):
     			f.write("%.6f\n" % p[z,x,y])
+    			#print(p[z,:,:])
+    			
+    #f.write("VECTORS Velocity float\n");
+    #for z in np.arange(0,frame.parameters['Size'][2],1):
+    # 	for x in np.arange(0,frame.parameters['Size'][0],1):
+    #		for y in np.arange(0,frame.parameters['Size'][1],1):
+    #           	f.write("%.6f %.6f %.6f\n" % (vx[z,x,y], vy[z,x,y], vz[z,x,y]));
 
+    #del vx
+    #del vy
+    #del vz
+    #del phi
     del p
     gc.collect()
     f.close()
@@ -101,6 +114,7 @@ def writeVTK(fname, frame):
     
 print('running write_vtk_from_JSON_05012021.py')
 rng = np.arange(1,ar._nframes+1,1)
+#rng = [414,415,416,417]
 for fr in (rng):
     fname = 'frame_' + str(fr) + '.vtk'
     print(fname,flush=True)
