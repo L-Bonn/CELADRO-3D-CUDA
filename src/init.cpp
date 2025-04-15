@@ -167,7 +167,7 @@ void Model::SetCellNumber(unsigned new_nphases)
   stored_dpol.resize(nphases,0.);
   timer.resize(nphases,0.);
 
- 
+ 	
 	divisiontthresh.resize(nphases);
 	double delta = prolif_freq;
 	double L = (2.*nsubsteps*nsteps - prolif_start*1.) - nphases * delta;
@@ -206,13 +206,14 @@ void Model::SetCellNumber(unsigned new_nphases)
     });
     */
 
-/*
-divisiontthresh.resize(nphases);
-std::generate(divisiontthresh.begin(), divisiontthresh.end(), [this]() {
-    return random_double_uniform(prolif_start*1., 2.*nsubsteps*nsteps);
-});
-*/
-    
+	/*
+	divisiontthresh.resize(nphases);
+	std::generate(divisiontthresh.begin(), divisiontthresh.end(), [this]() {
+	    return random_double_uniform(prolif_start*1., prolif_freq*2.-prolif_start*1.);
+	});
+	stored_tmean = divisiontthresh;
+	*/
+  
   //theta_nem.resize(nphases, 0.);
   /*
   alphas.resize(nphases,0.);

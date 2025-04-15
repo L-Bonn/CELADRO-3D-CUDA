@@ -27,7 +27,7 @@ if len(sys.argv) == 3:
 
 props = []
 # Here we loop over frames 1 to 20; adjust rng as needed.
-rng = np.arange(1, 258, 1)
+rng = np.arange(1, 255, 1)
 # Or: rng = np.arange(1, ar._nframes + 1)
 
 for fr in rng:

@@ -311,6 +311,7 @@ enum class ManageMemory {
   void AllocDeviceMemoryCellBirth();
   void FreeDeviceMemoryCellBirth();
   void _manage_device_memoryCellBirth(ManageMemory);
+  void Write_divAngle(unsigned t,unsigned n,unsigned i, bool mutate,double angle);
   std::vector<double> compute_eigen(double sxx,double sxy, double syy);
   std::vector<double> stress_criterion();
   void write_cellHist_binary(const std::string &filename,
@@ -396,7 +397,7 @@ enum class ManageMemory {
   void Write_contArea(unsigned);
   void Write_Density(unsigned);
   void visTMP(unsigned);
-  void Write_OU(unsigned);
+  void Write_OU(unsigned,unsigned);
   
   /** Write run parameters */
   void WriteParams();
@@ -670,6 +671,11 @@ enum class ManageMemory {
        & auto_name(field_sxy)
        & auto_name(field_sxz)
        & auto_name(field_syz)
+       & auto_name(stored_gam)
+       & auto_name(stored_omega_cc)
+       & auto_name(stored_omega_cs)
+       & auto_name(stored_alpha)
+       & auto_name(stored_dpol)
        & auto_name(cSxx)
        & auto_name(cSxy)
        & auto_name(cSxz)
