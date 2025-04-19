@@ -169,24 +169,27 @@ void Model::SetCellNumber(unsigned new_nphases)
 
  	
 	divisiontthresh.resize(nphases);
-	double delta = prolif_freq;
-	double L = (2.*nsubsteps*nsteps - prolif_start*1.) - nphases * delta;
-	if ((2.*nsubsteps*nsteps - prolif_start*1.) < (nphases*delta)) cout<<"the interval is too small to init divisiontthresh[i]"<<endl;
+	stored_tmean.resize(nphases);
+	//double delta = prolif_freq;
+	//double L = (2.*nsubsteps*nsteps - prolif_start*1.) - nphases * delta;
+	//if ((2.*nsubsteps*nsteps - prolif_start*1.) < (nphases*delta)) cout<<"the interval is too small to init divisiontthresh[i]"<<endl;
 	for (unsigned int i = 0; i < nphases; ++i) {
-	 divisiontthresh[i] = random_double_uniform(0.,L);
+	 // divisiontthresh[i] = scaling_factor * random_lognormal(prolif_freq_mean,prolif_freq_std,prolif_start);
+	 divisiontthresh[i] = 0.;
+	 stored_tmean[i] = scaling_factor * random_lognormal(prolif_freq_mean,prolif_freq_std,prolif_start);
 	}
-	std::sort(divisiontthresh.begin(), divisiontthresh.end());
-	for (unsigned int i = 0; i < nphases; ++i) {
-	 divisiontthresh[i] = prolif_start*1. + divisiontthresh[i] + i * delta;
-	}
+	//std::sort(divisiontthresh.begin(), divisiontthresh.end());
+	//for (unsigned int i = 0; i < nphases; ++i) {
+	// divisiontthresh[i] = prolif_start*1. + divisiontthresh[i] + i * delta;
+	//}
 
-	std::random_device rd;
-	std::mt19937 g(rd());
-	std::shuffle(divisiontthresh.begin(), divisiontthresh.end(), g);
-	stored_tmean = divisiontthresh;
+	//std::random_device rd;
+	//std::mt19937 g(rd());
+	//std::shuffle(divisiontthresh.begin(), divisiontthresh.end(), g);
+	//stored_tmean = divisiontthresh;
 	
 	
-	//stored_tmean.resize(nphases);
+	//
 	//for (unsigned int i = 0; i < nphases; ++i) {
 	 //stored_tmean[i] = divisiontthresh[i];
 	//}

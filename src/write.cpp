@@ -102,7 +102,7 @@ void Model::Write_OU(unsigned t,unsigned i) {
   const char * cname = oname.c_str();    
   FILE * sortie;
   sortie = fopen(cname, "a");
-  fprintf(sortie, "%u %u %u %g %g\n", i,n,t, timer[i], divisiontthresh[i]);
+  fprintf(sortie, "%u %u %u %g %g %g\n",i,n,t,timer[i],divisiontthresh[i],stored_tmean[i]);
   fclose(sortie);
   //}
 }

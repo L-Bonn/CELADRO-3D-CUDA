@@ -281,7 +281,7 @@ enum class ManageMemory {
   };
   
   void stress_criterionOU(unsigned, bool&, double&);
-  double UpdateOU(double tcurrent, double tmean, double tcorr, double sigma, unsigned dt);
+  double UpdateOU(double tcurrent, double tmean, double tcorr, double sigma, const double dt);
   void initDivisionOU(unsigned n, unsigned i, double angle, unsigned t, bool mutate);
   std::vector<double> timer, divisiontthresh, stored_tmean;
   double tcorr, tmean, sigma;
@@ -294,7 +294,8 @@ enum class ManageMemory {
   double mutation_strength = 0.;
   bool proliferate_bool = true;
   unsigned prolif_start;
-  unsigned prolif_freq;
+  double prolif_freq_mean, prolif_freq_std;
+  double scaling_factor = 5.;
   unsigned nphases_init;
   unsigned nphases_max = 1000;
   unsigned nphases_index_head;
@@ -440,6 +441,9 @@ enum class ManageMemory {
   double random_normal_full(double mean=0., double sigma=1.);
   /** Return random uniform double */
   double random_double_uniform(double min, double max);
+  /** Return random longnormal */ 
+  double random_lognormal(double mu, double sig, double minval);
+  double random_lognormal(double mu, double sig);
 
   /** Return geometric dist numbers, prob is p */
   unsigned random_geometric(double p);

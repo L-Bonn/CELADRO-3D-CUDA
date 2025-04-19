@@ -25,7 +25,7 @@ void Model::print_new_cell_props(){
   unsigned n;
   for(unsigned i=0; i<nphases_index.size(); ++i){
   n = nphases_index[i];
-  cout<<"n :"<<n<<" i: "<<i<<" "<<divisiontthresh[i]<<" "<<timer[i]<<endl;
+  cout<<"n :"<<n<<" "<<divisiontthresh[i]<<" "<<timer[i]<<endl;
   }
 }
 
@@ -132,13 +132,17 @@ void Model::DivideCell(unsigned n, unsigned idx, double division_orientation, do
   stored_tmean[idx] = divisiontthresh[idx];
   stored_tmean[idx-1] = divisiontthresh[idx-1];
   */
-	cout<<"index: "<<n<<" "<<idx<<" "<<idx-1<<endl;
-	double nmean = random_double_uniform(prolif_start*1.,2.*nsubsteps*nsteps);
+	cout<<"index: "<<n<<" "<<divisiontthresh[n]<<endl;
+	double nmean = scaling_factor * random_lognormal(prolif_freq_mean,prolif_freq_std,prolif_start);
+	// double nmean = random_double_uniform(prolif_start*1.,2.*nsubsteps*nsteps);
 	stored_tmean[idx] = nmean;
-	divisiontthresh[idx] = nmean;
-	nmean = random_double_uniform(prolif_start*1.,2.*nsubsteps*nsteps);
+	// divisiontthresh[idx] = nmean;
+	divisiontthresh[idx] = prolif_start;
+	nmean = scaling_factor * random_lognormal(prolif_freq_mean,prolif_freq_std,prolif_start);
+	//nmean = random_double_uniform(prolif_start*1.,2.*nsubsteps*nsteps);
 	stored_tmean[idx-1] = nmean;
-	divisiontthresh[idx-1] = nmean;
+	// divisiontthresh[idx-1] = nmean;
+	divisiontthresh[idx-1] = prolif_start;
 	
   /*
   std::random_device rd;
@@ -309,10 +313,10 @@ void Model::BirthCell(unsigned n)
 
 
 
-double Model::UpdateOU(double tcurrent, double tmean, double tcorr, double sigma, unsigned dt){
-double ddt = static_cast<double>(dt);
-double dW = std::sqrt(ddt) * random_normal(1.);
-return tcurrent - ((tcurrent-tmean) / tcorr) * ddt + sigma * dW;
+double Model::UpdateOU(double tcurrent, double tmean, double tcorr, double sigma, const double dt){
+//double ddt = static_cast<double>(dt);
+double dW = std::sqrt(dt) * random_normal(1.);
+return tcurrent - ((tcurrent-tmean) / tcorr) * dt + sigma * dW;
 }
 
 
@@ -376,7 +380,7 @@ void Model::initDivision(unsigned n, unsigned i, double division_orientation, un
 	BirthCell(nphases_index.size()-1);
 	ComputeBirthCellCOM(nphases_index.size(),i);
 	ComputeBirthCellCOM(nphases_index.size()-1,i);
-	cellLineage(/*cell_id=*/n,/*parent_id=*/-1,/*birth_time=*/-1,/*death_time=*/relt,/*physicalprop=*/gam,/*generation=*/cellGen);
+	cellLineage(/*cell_id=*/n,/*parent_id=*/-1,/*birth_time=*/-1,/*death_time=*/relt,/*physicalprop=*/cellProp,/*generation=*/cellGen);
 	KillCell(n,i);
 }
 
@@ -530,7 +534,7 @@ std::vector<double> Model::stress_criterion() {
 
 
 void Model::proliferate(unsigned t) {
-	if (proliferate_bool && (t > prolif_start) && nphases_index.size() < nphases_max) {
+
 	 unsigned i = 0;
 	 /*
 	 vector<unsigned> detached;
@@ -540,13 +544,15 @@ void Model::proliferate(unsigned t) {
 	     }
 	     }
 	 */
+	 // print_new_cell_props();
         while (i < nphases_index.size()) {
             unsigned n = nphases_index[i];
-            timer[i] += 1;
-            divisiontthresh[i] = UpdateOU(divisiontthresh[i], stored_tmean[i], tcorr, sigma, 1);
             Write_OU(t, i);
+            timer[i] += 1;
+            divisiontthresh[i] = UpdateOU(divisiontthresh[i], stored_tmean[i], tcorr, sigma, 1.);
 
-            if (timer[i] >= divisiontthresh[i] and (com[i][2]-wall_thickness) < 1.25*R) {
+
+            if (proliferate_bool && (t > prolif_start) && nphases_index.size() < nphases_max && timer[i] >= divisiontthresh[i] and (com[i][2]-wall_thickness) < 1.25*R) {
                 bool mutate = false;
                 double angle = 0.;
                 stress_criterionOU(i, mutate, angle);
@@ -562,7 +568,7 @@ void Model::proliferate(unsigned t) {
     }
     */
     
-                print_new_cell_props();
+                //print_new_cell_props();
                 nphases = nphases_index.size();
                 Write_divAngle(t, n, i, mutate, angle);
                 // nphases_index_head = nphases;
@@ -573,7 +579,6 @@ void Model::proliferate(unsigned t) {
             i++; // Move to the next index; the condition is re-evaluated based on the current size.
         }
     }
-}
 
 
 

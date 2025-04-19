@@ -74,7 +74,8 @@ def writeVTK(fname, frame):
     p = np.zeros(N)
     p = np.reshape(p,(frame.parameters['Size'][2],frame.parameters['Size'][0],frame.parameters['Size'][1]))
     for i in range(len(frame.phi)):
-    	p += frame.phi[i]
+    	if ((frame.com[i][2]-frame.parameters['wall_thickness']) < 1.5 * frame.parameters['R']):
+    		p += frame.phi[i]
     #mode = 'wrap' if frame.parameters['BC'] == 0 else 'constant'	
     #vx, vy, vz = get_velocity_field(frame.phi, frame.velocity, 1, mode=mode)
     

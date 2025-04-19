@@ -106,8 +106,10 @@ void Model::ParseProgramOptions(int ac, char **av)
       "maximum number of cells")
     ("prolif_start", opt::value<unsigned>(&prolif_start),
       "start timestep for proliferation")
-    ("prolif_freq", opt::value<unsigned>(&prolif_freq),
-      "frequency of proliferation")
+    ("prolif_freq_mean", opt::value<double>(&prolif_freq_mean),
+      "frequency of proliferation (mean)")
+    ("prolif_freq_std", opt::value<double>(&prolif_freq_std),
+      "frequency of proliferation (std)")
     ("time_corr_OU", opt::value<double>(&tcorr),
       "time correlation for OU process")// sigma * sqrt(tcorr/2) = standard deviation 
     //("tmean_OU", opt::value<double>(&tmean),
@@ -263,10 +265,9 @@ void Model::ParseProgramOptions(int ac, char **av)
   GlobalCellIndex = nphases-1;
   
   // tmean *= nsubsteps*2;
-  tcorr *= nsubsteps*2;
-  prolif_freq *= nsubsteps*2;
-  prolif_start *= nsubsteps*2;
-
+  tcorr *= nsubsteps*npc;
+  // prolif_freq *= nsubsteps*npc;
+  // prolif_start *= nsubsteps*npc;
 
   // set nstart to the next correct frame (round above)
   if(nstart%ninfo) nstart = (1u+nstart/ninfo)*ninfo;
