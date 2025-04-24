@@ -314,7 +314,6 @@ void Model::BirthCell(unsigned n)
 
 
 double Model::UpdateOU(double tcurrent, double tmean, double tcorr, double sigma, const double dt){
-//double ddt = static_cast<double>(dt);
 double dW = std::sqrt(dt) * random_normal(1.);
 return tcurrent - ((tcurrent-tmean) / tcorr) * dt + sigma * dW;
 }
@@ -333,16 +332,14 @@ void Model::initDivisionOU(unsigned n, unsigned i, double division_orientation, 
 	if (cellProp < min_prop_val) cellProp = min_prop_val;
 	} 
 	nphases_index_head = nphases_index_head + 1;
-	GlobalCellIndex = GlobalCellIndex + 1;
-	cellLineage(/*cell_id=*/GlobalCellIndex,/*parent_id=*/n,/*birth_time=*/relt,/*death_time=*/-1,/*physicalprop=*/cellProp,/*generation=*/cellGen);
 	nphases_index.push_back(nphases_index_head);
-	
+
 	nphases_index_head = nphases_index_head + 1;
-	GlobalCellIndex = GlobalCellIndex + 1;
-	cellLineage(/*cell_id=*/GlobalCellIndex,/*parent_id=*/n,/*birth_time=*/relt,/*death_time=*/-1,/*physicalprop=*/cellProp,/*generation=*/cellGen);
 	nphases_index.push_back(nphases_index_head);
-	//unsigned curr_idx = (nphases_index.size() - 2 == nphases_init) ? nphases_index.size() - 1 : nphases_index.size();
+
 	unsigned curr_idx = nphases_index.size() - 1;
+	cellLineage(/*cell_id=*/curr_idx,/*parent_id=*/n,/*birth_time=*/relt,/*death_time=*/-1,/*physicalprop=*/cellProp,/*generation=*/cellGen);
+	cellLineage(/*cell_id=*/curr_idx-1,/*parent_id=*/n,/*birth_time=*/relt,/*death_time=*/-1,/*physicalprop=*/cellProp,/*generation=*/cellGen);
 	DivideCell(i,curr_idx,division_orientation,cellProp);
 	BirthCell(curr_idx);
 	BirthCell(curr_idx-1);
@@ -353,36 +350,36 @@ void Model::initDivisionOU(unsigned n, unsigned i, double division_orientation, 
 }
 
 
-
-
-void Model::initDivision(unsigned n, unsigned i, double division_orientation, unsigned t){
-	double relt = static_cast<double>(t/(nsubsteps*ninfo));
-	BirthCellMemories(nphases_index.size() + 3);
+//void Model::initDivisionOU(unsigned n, unsigned i, double division_orientation, unsigned t, bool mutate){
+//	double relt = static_cast<double>(t) / (nsubsteps * ninfo);
+//	BirthCellMemories(nphases_index.size() + 3);
+//	
+//	int cellGen = cellHist[n].generation + 1;
+//	double cellProp = stored_gam[i];
+//	if (mutate){
+//	cellProp = cellProp + cellProp * mutation_strength;
+//	if (cellProp > max_prop_val) cellProp = max_prop_val;
+//	if (cellProp < min_prop_val) cellProp = min_prop_val;
+//	} 
+//	nphases_index_head = nphases_index_head + 1;
+//	GlobalCellIndex = GlobalCellIndex + 1;
+//	cellLineage(/*cell_id=*/GlobalCellIndex,/*parent_id=*/n,/*birth_time=*/relt,/*death_time=*/-1,/*physicalprop=*/cellProp,/*generation=*/cellGen);
+//	nphases_index.push_back(nphases_index_head);
 	
-	int cellGen = cellHist[n].generation + 1;
-	double cellProp = stored_gam[i] + stored_gam[i] * mutation_strength;
+//	nphases_index_head = nphases_index_head + 1;
+//	GlobalCellIndex = GlobalCellIndex + 1;
+//	cellLineage(/*cell_id=*/GlobalCellIndex,/*parent_id=*/n,/*birth_time=*/relt,/*death_time=*/-1,/*physicalprop=*/cellProp,/*generation=*/cellGen);
+//	nphases_index.push_back(nphases_index_head);
+//	unsigned curr_idx = nphases_index.size() - 1;
+//	DivideCell(i,curr_idx,division_orientation,cellProp);
+//	BirthCell(curr_idx);
+//	BirthCell(curr_idx-1);
+//	ComputeBirthCellCOM(curr_idx,i);
+//	ComputeBirthCellCOM(curr_idx-1,i);
+//	cellLineage(/*cell_id=*/n,/*parent_id=*/-1,/*birth_time=*/-1,/*death_time=*/relt,/*physicalprop=*/cellProp,/*generation=*/cellGen);
+//	KillCell(n,i);
+//}
 
-	if (cellProp > max_prop_val) cellProp = max_prop_val;
-	if (cellProp < min_prop_val) cellProp = min_prop_val;
-
-	nphases_index_head = nphases_index_head + 1;
-	GlobalCellIndex = GlobalCellIndex + 1;
-	cellLineage(/*cell_id=*/GlobalCellIndex,/*parent_id=*/n,/*birth_time=*/relt,/*death_time=*/-1,/*physicalprop=*/cellProp,/*generation=*/cellGen);
-	nphases_index.push_back(nphases_index_head);
-	
-	nphases_index_head = nphases_index_head + 1;
-	GlobalCellIndex = GlobalCellIndex + 1;
-	cellLineage(/*cell_id=*/GlobalCellIndex,/*parent_id=*/n,/*birth_time=*/relt,/*death_time=*/-1,/*physicalprop=*/cellProp,/*generation=*/cellGen);
-	nphases_index.push_back(nphases_index_head);
-	
-	DivideCell(i,nphases_index.size(),division_orientation,cellProp);
-	BirthCell(nphases_index.size());
-	BirthCell(nphases_index.size()-1);
-	ComputeBirthCellCOM(nphases_index.size(),i);
-	ComputeBirthCellCOM(nphases_index.size()-1,i);
-	cellLineage(/*cell_id=*/n,/*parent_id=*/-1,/*birth_time=*/-1,/*death_time=*/relt,/*physicalprop=*/cellProp,/*generation=*/cellGen);
-	KillCell(n,i);
-}
 
 
 std::vector<double> Model::compute_eigen(double sxx, double sxy, double syy){
