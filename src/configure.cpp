@@ -124,7 +124,7 @@ void Model::Configure()
   
   if(init_config=="input const" && BC != 3)
   {
-    string fname = "input_str.dat";
+    string fname = "/lustre/hpc/astro/rsx187/CELADRO-3D-CUDA/example/input_str.dat";
     double xcoor, ycoor, zcoor;
     fstream file(fname);
     for (unsigned n = 0 ; n < nphases_init ; n++){
