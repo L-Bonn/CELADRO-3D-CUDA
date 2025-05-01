@@ -227,7 +227,7 @@ def main():
     ncells = 25   # total number of cells (e.g., 9 => 3x3 grid)
     R0 = 8.0
     rad = R0
-    lbox = 2 * R0
+    lbox = 2. * R0
     nsqrt = int(math.sqrt(ncells))
     Lx = int(nsqrt * lbox)
     Ly = int(nsqrt * lbox)
@@ -239,7 +239,7 @@ def main():
     wall_thickness = 7.0
     zcoor = int(wall_thickness + R0/2.0)
 
-    gamma = 0.007
+    gamma = 0.0068
     omegacc = 0.001
     omegacw = 0.0025
     alpha = 0.05
@@ -247,7 +247,7 @@ def main():
     zetaS = 0.0
     zetaQ = 0.0
     tcorr = 5;
-    sigma = 2.;# sigma * sqrt(tcorr/2) = standard deviation 
+    sigma = 3.;# sigma * sqrt(tcorr/2) = standard deviation 
     mu = 45.0
     lambda_ = 3.0
     kappa = 0.5
@@ -264,7 +264,7 @@ def main():
     prolif_freq = 75;
     prolif = 'true';
     mutation_strength = +0.1;
-    max_prop_val = 0.009
+    max_prop_val = 0.0085
     min_prop_val = 0.005
 
     global d_max_mc
@@ -351,13 +351,14 @@ def main():
                                             write_posfile_mix_perc(nphases_init, xcf, ycf, zcf, zcoor, count)
 
                                             # Write simulation card file
+                                            '''
                                             write_simCard(config, gamma, omegacc, omegacw, alpha,
                                                           nsteps, ninfo, Lx, Ly, Lz, nsubsteps, bc,
                                                           margin, relax_time, nphases_init,nphases_max, mu, lambda_,
                                                           kappa, rad, xi, wall_thickness, wall_kappa,
                                                           SPOL, DPOL, JPOL, KPOL, zetaS, zetaQ,
                                                           SNEM, KNEM, JNEM, WNEM,prolif_start,prolif_freq,prolif,mutation_strength,max_prop_val,min_prop_val,tcorr,tmean,sigma, count)
-
+						  '''
                                             # You can compute ratios if needed:
                                             ratio_a = OMEGACC_A / OMEGACC_B if OMEGACC_B != 0 else None
                                             ratio_b = OMEGACW_A / OMEGACW_B if OMEGACW_B != 0 else None

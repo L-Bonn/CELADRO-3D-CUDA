@@ -54,16 +54,16 @@ void Model::Algorithm()
 
       try
       {
-        WriteFrame(t);
+       WriteFrame(t);
         // Write_OU(t);
         // print_new_cell_props();
         if (proliferate_bool) write_cellHist_binary("cellHist.bin", t, cellHist);
-        // Write_COM(t);
-        // Write_visData(t);
-		//Write_velocities(t);  
-		//Write_forces(t);  	
-  		//Write_contArea(t);
-  		//Write_Density(t);
+       // Write_COM(t);
+       //Write_visData(t);
+	//Write_velocities(t);  
+	//Write_forces(t);  	
+  	//Write_contArea(t);
+  	//Write_Density(t);
 
       }
       catch(...) {
@@ -124,9 +124,9 @@ void Model::Algorithm()
   if (proliferate_bool and !no_write and nsteps >= nstart) write_cellHist_binary("cellHist.bin", nsteps, cellHist);
   // if(!no_write and nsteps>=nstart) Write_COM(nsteps);	
   // if(!no_write and nsteps>=nstart) Write_velocities(nsteps);	
-  // if(!no_write and nsteps>=nstart) Write_forces(nsteps);
-  // if(!no_write and nsteps>=nstart) Write_contArea(nsteps);
-  // if(!no_write and nsteps>=nstart) Write_Density(nsteps);
+  //if(!no_write and nsteps>=nstart) Write_forces(nsteps);
+  //if(!no_write and nsteps>=nstart) Write_contArea(nsteps);
+  //if(!no_write and nsteps>=nstart) Write_Density(nsteps);
 	
 
 }

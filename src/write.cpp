@@ -73,33 +73,38 @@ void Model::Write_COM(unsigned t){
   
   for(unsigned n=0; n<nphases_index.size(); ++n)
   {
-    // cout<<t<<" "<<com[0][0]<<" "<<com[0][1]<<" "<<com[0][2]<<endl;   
     fprintf( sortie,"%u %.4e %.4e %.4e \n",t,com[n][0],com[n][1],com[n][2]);      
   }
     fclose(sortie);    
   
 }
 
-
-
-void Model::Write_OU(unsigned t) {
-    const std::string fname = "OU.dat";
-    FILE* sortie = fopen(fname.c_str(), "a");
-    if (!sortie) {
-        perror("fopen");
-        return;
+void Model::Write_divAngle(unsigned t, unsigned n, unsigned i, bool mutate, double angle) {
+    const std::string fname = "division_angles.dat";
+    const char *cname = fname.c_str();
+    FILE *sortie = fopen(cname, "a");
+    if (sortie != nullptr) {
+        // Using %u for unsigned integers, %d for the bool (cast to int), and %g for the double.
+        fprintf(sortie, "%u %u %u %u %d %g\n", t, n, i, nphases, static_cast<int>(mutate), angle);
+        fclose(sortie);
+    } else {
+        // Handle error: could not open file.
+        fprintf(stderr, "Error opening file %s\n", cname);
     }
+}
 
-    // Write a header line with the current timestep and number of particles
-    size_t nphases = nphases_index.size();
-    fprintf(sortie, "%u %zu\n", t, nphases);
 
-    // Write the data for each particle (each particle gets an index i from 0 to nphases-1)
-    for (size_t i = 0; i < nphases; i++) {
-        fprintf(sortie, "  %.4e %.4e\n", timer[i], divisiontthresh[i]);
-    }
-    
-    fclose(sortie);
+void Model::Write_OU(unsigned t,unsigned i) {
+
+  //for(unsigned n=0; n<nphases_index.size(); ++n){
+  unsigned n = nphases_index[i];
+  const string oname = inline_str("cell_", n,".dat");
+  const char * cname = oname.c_str();    
+  FILE * sortie;
+  sortie = fopen(cname, "a");
+  fprintf(sortie, "%u %u %u %g %g %g\n",i,n,t,timer[i],divisiontthresh[i],stored_tmean[i]);
+  fclose(sortie);
+  //}
 }
 
 
@@ -112,7 +117,7 @@ void Model::Write_contArea(unsigned t){
     FILE * sortie;
     sortie = fopen(cname, "a");   
     
-    for(unsigned n=nstart; n<nphases; ++n){
+    for(unsigned n=0; n<nphases_index.size(); ++n){
     double aL0 = 0.;
     double aL1 = 0.;
     double aL2 = 0.;
@@ -138,7 +143,7 @@ void Model::Write_Density(unsigned t){
     double aL0 = 0.;
     double aL1 = 0.;
     double aL2 = 0.;
-    for(unsigned n=nstart; n<nphases; ++n){
+    for(unsigned n=0; n<nphases_index.size(); ++n){
 
     // PRAGMA_OMP(omp parallel for num_threads(nthreads) if(nthreads))
     for(unsigned q=0; q<patch_N; ++q){ 
@@ -236,7 +241,7 @@ void Model::Write_forces(unsigned t){
     FILE * sortie;
     sortie = fopen(cname, "a");    
   
-  for(unsigned n=nstart; n<nphases; ++n)
+  for(unsigned n=nstart; n<nphases_index.size(); ++n)
   {
         
     fprintf(sortie,"%u %.4e %.4e %.4e %.4e %.4e %.4e %.4e %.4e %.4e %.4e %.4e %.4e\n",t,Fpressure[n][0],Fpressure[n][1],Fpressure[n][2],Fnem[n][0],Fnem[n][1],Fnem[n][2],Fshape[n][0],Fshape[n][1],Fshape[n][2],Fpol[n][0],Fpol[n][1],Fpol[n][2]   );      

@@ -30,7 +30,7 @@ ar = archive.loadarchive(archive_file)
 # Step A: Gather all properties from all frames.
 ##############################################################################
 all_props = []
-rng = np.arange(1, 258, 1)  # for demonstration; or use ar._nframes
+rng = np.arange(1, 254, 1)  # for demonstration; or use ar._nframes
 
 for fr in rng:
     frame = ar.read_frame(fr)
