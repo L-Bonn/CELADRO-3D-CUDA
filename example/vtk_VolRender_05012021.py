@@ -100,11 +100,14 @@ def VolRendering(fin,fout):
 
 print('running vtk_VolRender_05012021.py')
 rng = np.arange(1,106,1)
+folder = 'tempout/'
+folder = ''
 #rng = [165,195,215,300]
 for fr in (rng):
     print('time step: ',fr,flush=True)
-    fin = 'frame_' + str(fr) + '.vtk'
-    fout = 'config_' + str(fr) + '.png'
+    fin = folder+'frame_' + str(fr) + '.vtk'
+    fout = folder+'config_' + str(fr) + '.png'
+    print(fin, flush=True)
     VolRendering(fin,fout)
 
     
