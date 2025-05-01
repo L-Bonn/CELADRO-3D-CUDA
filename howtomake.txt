@@ -1,0 +1,7 @@
+module load astro
+module load cuda/12.4
+mkdir build
+cd build 
+rm * -r
+cmake ..
+make
