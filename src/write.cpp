@@ -79,13 +79,13 @@ void Model::Write_COM(unsigned t){
   
 }
 
-void Model::Write_divAngle(unsigned t, unsigned n, unsigned i, bool mutate, double angle) {
+void Model::Write_divAngle(unsigned t, unsigned n, unsigned i, bool mutate, double angle, double plocal, double pcomp, double ptens) {
     const std::string fname = "division_angles.dat";
     const char *cname = fname.c_str();
     FILE *sortie = fopen(cname, "a");
     if (sortie != nullptr) {
         // Using %u for unsigned integers, %d for the bool (cast to int), and %g for the double.
-        fprintf(sortie, "%u %u %u %u %d %g\n", t, n, i, nphases, static_cast<int>(mutate), angle);
+        fprintf(sortie, "%u %u %u %u %d %g %g %g %g\n", t, n, i, nphases, static_cast<int>(mutate), angle,plocal,pcomp,ptens);
         fclose(sortie);
     } else {
         // Handle error: could not open file.

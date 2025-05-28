@@ -26,7 +26,7 @@ void Model::Initialize()
 
   for(unsigned k = 0 ; k < nphases_init ; k++){
   nphases_index.push_back(k);
-  cellLineage(/*cell_id=*/k,/*parent_id=*/-1,/*birth_time=*/0,/*death_time=*/-1,/*physicalprop=*/gam,/*generation=*/0);
+  cellLineage(/*cell_id=*/k,/*parent_id=*/-1,/*birth_time=*/0,/*death_time=*/-1,/*physicalprop=*/omega_cc,/*generation=*/0);
   }
   
 
@@ -155,6 +155,7 @@ void Model::SetCellNumber(unsigned new_nphases)
   cSyy.resize(nphases,0.);
   cSyz.resize(nphases,0.);
   cSzz.resize(nphases,0.);
+
   offset.resize(nphases, {0u, 0u, 0u});
   theta_pol.resize(nphases, 0.);
   theta_pol_old.resize(nphases, 0.);
@@ -170,80 +171,12 @@ void Model::SetCellNumber(unsigned new_nphases)
  	
 	divisiontthresh.resize(nphases);
 	stored_tmean.resize(nphases);
-	//double delta = prolif_freq;
-	//double L = (2.*nsubsteps*nsteps - prolif_start*1.) - nphases * delta;
-	//if ((2.*nsubsteps*nsteps - prolif_start*1.) < (nphases*delta)) cout<<"the interval is too small to init divisiontthresh[i]"<<endl;
+
 	for (unsigned int i = 0; i < nphases; ++i) {
-	 // divisiontthresh[i] = scaling_factor * random_lognormal(prolif_freq_mean,prolif_freq_std,prolif_start);
-	 divisiontthresh[i] = 0.;
-	 stored_tmean[i] = scaling_factor * random_lognormal(prolif_freq_mean,prolif_freq_std,prolif_start);
+	 divisiontthresh[i] = prolif_start;
+	 stored_tmean[i] = prolif_start + random_exponential(1./prolif_freq_mean);// mean = 1/lambda
 	}
-	//std::sort(divisiontthresh.begin(), divisiontthresh.end());
-	//for (unsigned int i = 0; i < nphases; ++i) {
-	// divisiontthresh[i] = prolif_start*1. + divisiontthresh[i] + i * delta;
-	//}
 
-	//std::random_device rd;
-	//std::mt19937 g(rd());
-	//std::shuffle(divisiontthresh.begin(), divisiontthresh.end(), g);
-	//stored_tmean = divisiontthresh;
-	
-	
-	//
-	//for (unsigned int i = 0; i < nphases; ++i) {
-	 //stored_tmean[i] = divisiontthresh[i];
-	//}
-    /*
-    for (unsigned int i = 0; i < nphases-1; ++i) {
-        cout<<divisiontthresh[i+1]-divisiontthresh[i]<<" "<<delta<<endl;
-    }
-    */
-    
-      // divisiontthresh.resize(nphases,0.);
-  
-    /*
-    double current = prolif_start*1.;
-    std::generate_n(divisiontthresh.begin(), nphases, [&current]() {
-        // Return the current value, then increment it by 1
-        return current++;
-    });
-    */
-
-	/*
-	divisiontthresh.resize(nphases);
-	std::generate(divisiontthresh.begin(), divisiontthresh.end(), [this]() {
-	    return random_double_uniform(prolif_start*1., prolif_freq*2.-prolif_start*1.);
-	});
-	stored_tmean = divisiontthresh;
-	*/
-  
-  //theta_nem.resize(nphases, 0.);
-  /*
-  alphas.resize(nphases,0.);
-  zetaS_field.resize(nphases,0.);
-  zetaQ_field.resize(nphases,0.);
-  gams.resize(nphases,0.);
-  omega_ccs.resize(nphases,0.);
-  omega_cws.resize(nphases,0.);
-  xis.resize(nphases,0.);
-  kappas.resize(nphases,0.);
-  mus.resize(nphases,0.);
-  Rs.resize(nphases,0.);
-  V0.resize(nphases,0.);
-  cellTypes.resize(nphases,0.);
-  */
-  /*
-  S00.resize(nphases, 0.);
-  S01.resize(nphases, 0.);
-  S02.resize(nphases, 0.);
-  S12.resize(nphases, 0.);
-  S11.resize(nphases, 0.);
-  S22.resize(nphases, 0.);
-  Q00.resize(nphases, 0.);
-  Q01.resize(nphases, 0.);
-  */
-  //theta_nem_old.resize(nphases, 0.);
-  //tau.resize(nphases, 0.);
 }
 
 void Model::InitializeNeighbors()

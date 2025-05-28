@@ -58,7 +58,7 @@ void Model::Algorithm()
         // Write_OU(t);
         // print_new_cell_props();
         if (proliferate_bool) write_cellHist_binary("cellHist.bin", t, cellHist);
-       // Write_COM(t);
+       Write_COM(t);
        //Write_visData(t);
 	//Write_velocities(t);  
 	//Write_forces(t);  	
@@ -91,10 +91,10 @@ void Model::Algorithm()
       // subsequent sweeps produce corrected values
     	for(unsigned i=0; i<=npc; ++i){
     	       //unsigned tstep = (i + streak_length * s + streak_length * npc * t);
-        	Update(i==0,globalT);
+        	Update(i==0,i==npc,globalT);
         	globalT++;
-        	// cout<<globalT<<endl;
         	}
+        	// globalT++;
     }
 
 
@@ -122,7 +122,7 @@ void Model::Algorithm()
   if(!no_write and nsteps>=nstart) WriteFrame(nsteps);
   // if(!no_write and nsteps>=nstart) Write_OU(nsteps);
   if (proliferate_bool and !no_write and nsteps >= nstart) write_cellHist_binary("cellHist.bin", nsteps, cellHist);
-  // if(!no_write and nsteps>=nstart) Write_COM(nsteps);	
+  if(!no_write and nsteps>=nstart) Write_COM(nsteps);	
   // if(!no_write and nsteps>=nstart) Write_velocities(nsteps);	
   //if(!no_write and nsteps>=nstart) Write_forces(nsteps);
   //if(!no_write and nsteps>=nstart) Write_contArea(nsteps);
