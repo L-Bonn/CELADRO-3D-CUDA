@@ -32,6 +32,7 @@ class archive(archive_base.archive):
     def read_frame(self, frame):
         frame = super(archive, self).read_frame(frame)
 
+
         # array sizes
         lx, ly, lz = self.Size
         px, py, pz = self.patch_size
