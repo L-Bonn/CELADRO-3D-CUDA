@@ -25,7 +25,7 @@ void Model::print_new_cell_props(){
   unsigned n;
   for(unsigned i=0; i<nphases_index.size(); ++i){
   n = nphases_index[i];
-  cout<<"n :"<<n<<" "<<divisiontthresh[i]<<" "<<timer[i]<<endl;
+  cout<<"n :"<<n<<" "<<divisiontthresh[i]<<" "<<timer[i]<<" "<<stored_tmean[i]<<endl;
   }
 }
 
@@ -52,6 +52,7 @@ void Model::BirthCellMemories(unsigned new_nphases){
   cSyy.resize(new_nphases,0.);
   cSyz.resize(new_nphases,0.);
   cSzz.resize(new_nphases,0.);
+
   theta_pol.resize(new_nphases, 0.);
   theta_pol_old.resize(new_nphases, 0.);
   delta_theta_pol.resize(new_nphases, 0.);
@@ -95,14 +96,11 @@ void Model::DivideCell(unsigned n, unsigned idx, double division_orientation, do
   double py = com[n][1];
   double pz = com[n][2];
   
-  //stored_gam[idx] = stored_gam[n];
-  //stored_gam[idx-1] = stored_gam[n];
+  stored_gam[idx] = stored_gam[n];
+  stored_gam[idx-1] = stored_gam[n];
   
-  stored_gam[idx] = cellProp;
-  stored_gam[idx-1] = cellProp;
-  
-  stored_omega_cc[idx] = stored_omega_cc[n];
-  stored_omega_cc[idx-1] = stored_omega_cc[n];
+  stored_omega_cc[idx] = cellProp;
+  stored_omega_cc[idx-1] = cellProp;
 
   stored_omega_cs[idx] = stored_omega_cs[n];
   stored_omega_cs[idx-1] = stored_omega_cs[n];
@@ -123,38 +121,13 @@ void Model::DivideCell(unsigned n, unsigned idx, double division_orientation, do
   
   timer[idx] = 0.;
   timer[idx-1] = 0.;
-  
-  //divisiontthresh[idx] = random_normal_full(tmean,(1./4.)*tmean);//tmean
-  //divisiontthresh[idx-1] = random_normal_full(tmean,(1./4.)*tmean);//tmean
-  /*
-  divisiontthresh[idx] = random_double_uniform(prolif_start*1.,2.*prolif_freq-prolif_start*1.);
-  divisiontthresh[idx-1] = random_double_uniform(prolif_start*1.,2.*prolif_freq-prolif_start*1.);
-  stored_tmean[idx] = divisiontthresh[idx];
-  stored_tmean[idx-1] = divisiontthresh[idx-1];
-  */
-	cout<<"index: "<<n<<" "<<divisiontthresh[n]<<endl;
-	double nmean = scaling_factor * random_lognormal(prolif_freq_mean,prolif_freq_std,prolif_start);
-	// double nmean = random_double_uniform(prolif_start*1.,2.*nsubsteps*nsteps);
-	stored_tmean[idx] = nmean;
-	// divisiontthresh[idx] = nmean;
-	divisiontthresh[idx] = prolif_start;
-	nmean = scaling_factor * random_lognormal(prolif_freq_mean,prolif_freq_std,prolif_start);
-	//nmean = random_double_uniform(prolif_start*1.,2.*nsubsteps*nsteps);
-	stored_tmean[idx-1] = nmean;
-	// divisiontthresh[idx-1] = nmean;
-	divisiontthresh[idx-1] = prolif_start;
-	
-  /*
-  std::random_device rd;
-  std::mt19937 gen(rd());
-  std::uniform_int_distribution<> dis(0, stored_tmean.size() - 1);
-  int random_index = dis(gen);
-  stored_tmean[idx] = stored_tmean[random_index];
-  random_index = dis(gen);
-  stored_tmean[idx-1] = stored_tmean[random_index];
-  divisiontthresh[idx] = divisiontthresh[idx];
-  divisiontthresh[idx-1] = divisiontthresh[idx-1];
-  */
+
+	stored_tmean[idx] = relax_time + random_exponential(1./prolif_freq_mean);// mean = 1/lambda
+	divisiontthresh[idx] = 0.;
+
+	stored_tmean[idx-1] = relax_time + random_exponential(1./prolif_freq_mean);// mean = 1/lambda
+	divisiontthresh[idx-1] = 0.;
+
   
   double rndir = random_uniform();
   double px1 = px + (R)*cos(rndir);
@@ -272,6 +245,7 @@ void Model::KillCell(unsigned n, unsigned i){
 	cSyy.erase(cSyy.begin()+i);
 	cSyz.erase(cSyz.begin()+i);
 	cSzz.erase(cSzz.begin()+i);
+
 	Fpressure.erase(Fpressure.begin()+i);
 	vorticity.erase(vorticity.begin()+i);
 	delta_theta_pol.erase(delta_theta_pol.begin()+i);
@@ -325,7 +299,7 @@ void Model::initDivisionOU(unsigned n, unsigned i, double division_orientation, 
 	BirthCellMemories(nphases_index.size() + 3);
 	
 	int cellGen = cellHist[n].generation + 1;
-	double cellProp = stored_gam[i];
+	double cellProp = stored_omega_cc[i];
 	if (mutate){
 	cellProp = cellProp + cellProp * mutation_strength;
 	if (cellProp > max_prop_val) cellProp = max_prop_val;
@@ -348,37 +322,6 @@ void Model::initDivisionOU(unsigned n, unsigned i, double division_orientation, 
 	cellLineage(/*cell_id=*/n,/*parent_id=*/-1,/*birth_time=*/-1,/*death_time=*/relt,/*physicalprop=*/cellProp,/*generation=*/cellGen);
 	KillCell(n,i);
 }
-
-
-//void Model::initDivisionOU(unsigned n, unsigned i, double division_orientation, unsigned t, bool mutate){
-//	double relt = static_cast<double>(t) / (nsubsteps * ninfo);
-//	BirthCellMemories(nphases_index.size() + 3);
-//	
-//	int cellGen = cellHist[n].generation + 1;
-//	double cellProp = stored_gam[i];
-//	if (mutate){
-//	cellProp = cellProp + cellProp * mutation_strength;
-//	if (cellProp > max_prop_val) cellProp = max_prop_val;
-//	if (cellProp < min_prop_val) cellProp = min_prop_val;
-//	} 
-//	nphases_index_head = nphases_index_head + 1;
-//	GlobalCellIndex = GlobalCellIndex + 1;
-//	cellLineage(/*cell_id=*/GlobalCellIndex,/*parent_id=*/n,/*birth_time=*/relt,/*death_time=*/-1,/*physicalprop=*/cellProp,/*generation=*/cellGen);
-//	nphases_index.push_back(nphases_index_head);
-	
-//	nphases_index_head = nphases_index_head + 1;
-//	GlobalCellIndex = GlobalCellIndex + 1;
-//	cellLineage(/*cell_id=*/GlobalCellIndex,/*parent_id=*/n,/*birth_time=*/relt,/*death_time=*/-1,/*physicalprop=*/cellProp,/*generation=*/cellGen);
-//	nphases_index.push_back(nphases_index_head);
-//	unsigned curr_idx = nphases_index.size() - 1;
-//	DivideCell(i,curr_idx,division_orientation,cellProp);
-//	BirthCell(curr_idx);
-//	BirthCell(curr_idx-1);
-//	ComputeBirthCellCOM(curr_idx,i);
-//	ComputeBirthCellCOM(curr_idx-1,i);
-//	cellLineage(/*cell_id=*/n,/*parent_id=*/-1,/*birth_time=*/-1,/*death_time=*/relt,/*physicalprop=*/cellProp,/*generation=*/cellGen);
-//	KillCell(n,i);
-//}
 
 
 
@@ -465,83 +408,160 @@ void Model::cellLineage(int cell_id, int parent_id, double birth_t, double death
     }
 }
 
-
+/*
 void Model::stress_criterionOU(unsigned pcellIndex, bool &mutate, double &angle) {
-    double stressSum = 0.0;
-    unsigned count = 0;
-    const unsigned numPhases = nphases_index.size();
 
-    // Compute average stress over all cells except pcellIndex.
-    for (unsigned i = 0; i < numPhases; ++i) {
-        const unsigned idx = nphases_index[i];
-        if (idx != pcellIndex) {
-            stressSum += (cSxx[idx] + cSyy[idx] + cSzz[idx]) / 3.0;
-            ++count;
-        }
-    }
-    double avgStress = (count > 0) ? stressSum / count : 0.0;
-
-    // Compute hydrostatic stress for cell pcellIndex.
     double cellStress = (cSxx[pcellIndex] + cSyy[pcellIndex] + cSzz[pcellIndex]) / 3.0;
     mutate = (cellStress > avgStress);
 
-    // Compute eigenvalues/eigenvectors for the cell's stress tensor.
     const double sxx = cSxx[pcellIndex];
     const double sxy = cSxy[pcellIndex];
     const double syy = cSyy[pcellIndex];
     const auto eigenResults = compute_eigen(sxx, sxy, syy);
-
-    // Compute an angle from the eigenvector components.
     angle = std::atan2(eigenResults[3], eigenResults[2]);
+}
+*/
+
+double Model::compute_percentile(double p, vector<double>& fdata) {
+    if(fdata.empty()) return 0.0;
+    sort(fdata.begin(), fdata.end());
+    double index = (p / 100.0) * (fdata.size() - 1);
+    if(index == floor(index)) {
+        return fdata[static_cast<int>(index)];
+    }
+    int lower_idx = static_cast<int>(floor(index));
+    int upper_idx = lower_idx + 1;
+    if(upper_idx >= fdata.size()) {
+        return fdata.back();
+    }
+    double fraction = index - lower_idx;
+    return fdata[lower_idx] + fraction * (fdata[upper_idx] - fdata[lower_idx]);
 }
 
 
-std::vector<double> Model::stress_criterion() {
-        unsigned best_i = 0;
-        unsigned best_n = 0;
-        std::vector<double> best_eigdirmax = {0.0, 0.0};
-        double best_ratio = -std::numeric_limits<double>::infinity();
+void Model::proliferate_stress_based(unsigned t) {
 
-        for (unsigned i = 0; i < nphases_index.size(); ++i) {
-            unsigned n = nphases_index[i];
-            double sxx = cSxx[i];
-            double sxy = cSxy[i];
-            double syy = cSyy[i];
+	double pcompglobal = 0.;
+	double ptensglobal = 0.;
+	double wcompglobal = 0.;
+	double wtensglobal = 0.;
+	vector<double> pcompdata;
+	vector<double> ptensdata;
+	vector<unsigned> detached;
+	for(unsigned i=0; i<nphases_index.size(); ++i){
+	if ((com[i][2] - wall_thickness) > 4.*R) {
+	  detached.push_back(i);
+	}
+       for(unsigned q=0; q<patch_N; ++q){
+    	const auto  k  = GetIndexFromPatch(i, q);
+    	double press = (1./3.) * (field_sxx[k] + field_syy[k] + field_szz[k]);
+    	if (press <= 0.){
+    	pcompglobal += phi[i][q] * press;
+    	wcompglobal += phi[i][q];
+    	pcompdata.push_back(press);
+    	}
+    	if (press > 0.){
+    	ptensglobal += phi[i][q] * press;
+    	wtensglobal += phi[i][q];
+    	ptensdata.push_back(press);
+    	}
+	}
+	}
+	ptensglobal /= wtensglobal;
+	pcompglobal /= wcompglobal;
+	sort(pcompdata.begin(), pcompdata.end());
+	sort(ptensdata.begin(), ptensdata.end());
+	
+	// double p60 = compute_percentile(60,fdata);
+	// double p70 = compute_percentile(70,fdata);
+	// double p80 = compute_percentile(80,fdata);
+	// double p90 = compute_percentile(90,fdata);
+	
+	/*
+	if (t > prolif_start){
+	cout<<t<<" "<<prolif_start<<endl;
+	}
+	*/
 
-            std::vector<double> eigen_results = compute_eigen(sxx, sxy, syy);
-            double eigvalmax = eigen_results[0];
-            double eigvalmin = eigen_results[1];
-            // eigen_results[2] and eigen_results[3] form the eigenvector for eigvalmax
-            // Compute the ratio; (assumes eigvalmin is nonzero)
-            double ratio = eigvalmax / eigvalmin;
+	unsigned i = 0;
+	while (i < nphases_index.size()) {
+		unsigned n = nphases_index[i];
+		Write_OU(t, i);
+		timer[i] += 1;
+		divisiontthresh[i] = UpdateOU(divisiontthresh[i], stored_tmean[i], tcorr, sigma, 1.);
+		
+		double plocal = 0.;
+		double sxxlocal = 0.;
+		double sxylocal = 0.;
+		double syylocal = 0.;
+		double wlocal = 0.;
+       	for(unsigned q=0; q<patch_N; ++q){
+    		const auto  k  = GetIndexFromPatch(i, q);
+       	plocal += phi[i][q] * (1./3.)*(field_sxx[k]+field_syy[k]+field_szz[k]);
+       	sxxlocal += phi[i][q] * field_sxx[k];
+       	sxylocal += phi[i][q] * field_sxy[k];
+       	syylocal += phi[i][q] * field_syy[k];
+       	wlocal += phi[i][q];
+		}
+		
+		plocal /= wlocal;
+		sxxlocal /= wlocal;
+		syylocal /= wlocal;
+		sxylocal /= wlocal;
+		
+		// stress_based_prolif_criterion =  (pglobal * (plocal - pglobal)) > 0;
+              if (proliferate_bool && (t > prolif_start) && nphases_index.size() < nphases_max && timer[i] >= divisiontthresh[i] && (com[i][2]-wall_thickness) < 3.*R) {
+		cout<<"dividing cell "<<i<<" "<<n<<" "<<timer[i]<<" "<<divisiontthresh[i]<<endl;
+		
+		bool mutate = false;
 
-            if (ratio > best_ratio) {
-                best_ratio = ratio;
-                best_i = i;
-                best_n = n;
-                best_eigdirmax = {eigen_results[2], eigen_results[3]};
-            }
-        }
-	 double angle = std::atan2(best_eigdirmax[1], best_eigdirmax[0]);
-        // Return the result as a list of doubles:
-        // best phase index, corresponding n, eigenvector for the maximum eigenvalue (x and y components)
-        return {static_cast<double>(best_i), static_cast<double>(best_n),angle};
-                // best_eigdirmax[0], best_eigdirmax[1]};
-    }
+		if (plocal <= 0. && plocal < pcompglobal){
+		mutate = true;
+		}
+		if (plocal > 0. && plocal > ptensglobal){
+		mutate = true;
+		}
+    		const auto eigenResults = compute_eigen(sxxlocal, sxylocal, syylocal);
+    		double angle = std::atan2(eigenResults[3], eigenResults[2]);
+    
+		GetFromDevice();
+		FreeDeviceMemoryCellBirth();
+		initDivisionOU(n, i, angle, t, mutate);
+
+		while (!detached.empty()) {
+		unsigned j = detached.back();
+		detached.pop_back();
+		cout<<"removing :"<<j<<" "<<nphases_index[j]<<endl;
+		KillCell(nphases_index[j], j);
+		}
+		print_new_cell_props();
+		nphases = nphases_index.size();
+		Write_divAngle(t, n, i, mutate, angle,plocal,pcompglobal,ptensglobal);
+		AllocDeviceMemoryCellBirth();
+		PutToDevice();
+		cout << "proliferation complete; current number at " << nphases << endl;
+		}
+		i++; // Move to the next index; the condition is re-evaluated based on the current size.
+	}
+}
 
 
+
+
+   /* 
 void Model::proliferate(unsigned t) {
 
-	 unsigned i = 0;
-	 /*
+
+	 
 	 vector<unsigned> detached;
 	for(unsigned i=0; i<nphases_index.size(); ++i){
-	     if ((com[i][2] - wall_thickness) > 1.5 * R) {
+	     if ((com[i][2] - wall_thickness) > 30) {
 		  detached.push_back(i);
 	     }
 	     }
-	 */
+	 
 	 // print_new_cell_props();
+	 unsigned i = 0;
         while (i < nphases_index.size()) {
             unsigned n = nphases_index[i];
             Write_OU(t, i);
@@ -549,21 +569,20 @@ void Model::proliferate(unsigned t) {
             divisiontthresh[i] = UpdateOU(divisiontthresh[i], stored_tmean[i], tcorr, sigma, 1.);
 
 
-            if (proliferate_bool && (t > prolif_start) && nphases_index.size() < nphases_max && timer[i] >= divisiontthresh[i] and (com[i][2]-wall_thickness) < 1.25*R) {
+            if (proliferate_bool && (t > prolif_start) && nphases_index.size() < nphases_max && timer[i] >= divisiontthresh[i] and (com[i][2]-wall_thickness) < 2*R) {
                 bool mutate = false;
                 double angle = 0.;
                 stress_criterionOU(i, mutate, angle);
                 GetFromDevice();
                 FreeDeviceMemoryCellBirth();
                 initDivisionOU(n, i, angle, t, mutate);
-    // Process all detached indices.
-    /*
+    
     while (!detached.empty()) {
         unsigned j = detached.back();
         detached.pop_back();
+        cout<<"removing :"<<j<<" "<<nphases_index[j]<<endl;
         KillCell(nphases_index[j], j);
     }
-    */
     
                 //print_new_cell_props();
                 nphases = nphases_index.size();
@@ -576,7 +595,7 @@ void Model::proliferate(unsigned t) {
             i++; // Move to the next index; the condition is re-evaluated based on the current size.
         }
     }
-
+*/
 
 
 void Model::write_cellHist_binary(const std::string &filename,

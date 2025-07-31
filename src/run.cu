@@ -55,7 +55,7 @@ void Model::Pre()
     if(relax_nsubsteps) swap(nsubsteps, relax_nsubsteps);
 
     for(unsigned i=0; i<relax_time*nsubsteps; ++i)
-      for(unsigned j=0; j<=npc; ++j) Update(0,j==0);
+      for(unsigned j=0; j<=npc; ++j) Update(0,0,j==0);
 
     if(relax_nsubsteps) swap(nsubsteps, relax_nsubsteps);
 
@@ -374,6 +374,7 @@ void cuUpdatePhysicalFieldsAtNode( stencil *neighbors,
 	atomicAdd(&cSyy[n],p*field_syy[k]);
 	atomicAdd(&cSyz[n],p*field_syz[k]);
 	atomicAdd(&cSzz[n],p*field_szz[k]);
+
 	
 	// store derivatives
 	phi_dx[m] = dx;
@@ -609,9 +610,8 @@ void cuUpdatePhaseFieldAtNode(	double *phi,
     atomicAdd(&com_y[n].y, cmy.y); 
     atomicAdd(&com_z[n].x, cmz.x); 
     atomicAdd(&com_z[n].y, cmz.y); 
+    atomicAdd(&vol[n],p*p);
 
-    
-    atomicAdd(&vol[n],p*p);//-->vol[n]
     
   sum_one[k] = 0;
   sum_two[k] = 0;
@@ -710,7 +710,7 @@ void cuUpdateAtCell(			  	cuDoubleComplex *com_x,
     
 
 
-__host__ void Model::Update(bool store, unsigned t)
+__host__ void Model::Update(bool store, bool end_pred_corr_step, unsigned t)
 {
     
     n_total   = static_cast<int>(nphases_index.size() * patch_N);
@@ -928,10 +928,6 @@ __host__ void Model::Update(bool store, unsigned t)
                                  d_rand_states,
                                  store);
                                  
-                                 //d_field_polx,
-                                 //d_field_poly,
-                                 //d_field_polz);
-                                 
 
     err = cudaGetLastError();
     if (err != cudaSuccess) {
@@ -977,8 +973,11 @@ __host__ void Model::Update(bool store, unsigned t)
     }
     cudaDeviceSynchronize();
     
-    
-    proliferate(t);
+    GetFromDevice();
+    // proliferate(t);
+    // if (end_pred_corr_step) 
+    proliferate_stress_based(t);
+
     
 }
 

@@ -107,6 +107,7 @@ void Model::_manage_device_memoryCellBirth(ManageMemory which)
     malloc_or_free(d_cSyy, nphases, which);
     malloc_or_free(d_cSyz, nphases, which);
     malloc_or_free(d_cSzz, nphases, which);
+
     
     malloc_or_free(d_Fpressure, nphases, which);
     malloc_or_free(d_vorticity, nphases, which);
@@ -176,6 +177,7 @@ void Model::_manage_device_memory(ManageMemory which)
     malloc_or_free(d_cSyy, nphases, which);
     malloc_or_free(d_cSyz, nphases, which);
     malloc_or_free(d_cSzz, nphases, which);
+
     
     malloc_or_free(d_Fpressure, nphases, which);
     malloc_or_free(d_vorticity, nphases, which);
@@ -226,6 +228,7 @@ void Model::_copy_device_memory(CopyMemory dir)
     bidirectional_memcpy(d_cSyy, &cSyy[0], nphases, dir);
     bidirectional_memcpy(d_cSyz, &cSyz[0], nphases, dir);
     bidirectional_memcpy(d_cSzz, &cSzz[0], nphases, dir);
+
         
     bidirectional_memcpy(d_field_press, &field_press[0], N, dir);
     bidirectional_memcpy(d_neighbors, &neighbors[0], N, dir);

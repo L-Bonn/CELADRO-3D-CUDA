@@ -99,8 +99,7 @@ def VolRendering(fin,fout):
 
 
 print('running vtk_VolRender_05012021.py')
-rng = np.arange(1,106,1)
-folder = 'tempout/'
+rng = np.arange(1,122,1)folder = 'tempout/'
 folder = ''
 #rng = [165,195,215,300]
 for fr in (rng):

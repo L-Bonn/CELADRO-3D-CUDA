@@ -283,6 +283,7 @@ enum class ManageMemory {
   void stress_criterionOU(unsigned, bool&, double&);
   double UpdateOU(double tcurrent, double tmean, double tcorr, double sigma, const double dt);
   void initDivisionOU(unsigned n, unsigned i, double angle, unsigned t, bool mutate);
+  double compute_percentile(double p, std::vector<double>& fdata);
   std::vector<double> timer, divisiontthresh, stored_tmean;
   double tcorr, tmean, sigma;
   double max_prop_val;
@@ -299,8 +300,9 @@ enum class ManageMemory {
   unsigned nphases_init;
   unsigned nphases_max = 1000;
   unsigned nphases_index_head;
-  unsigned GlobalCellIndex;
+  // unsigned GlobalCellIndex;
   void proliferate(unsigned);
+  void proliferate_stress_based(unsigned);
   void initDivision(unsigned n, unsigned i, double angle, unsigned t);
   void BirthCellMemories(unsigned new_nphases);
   void DivideCell(unsigned n, unsigned nphases_current, double angle, double cellProp);
@@ -312,7 +314,7 @@ enum class ManageMemory {
   void AllocDeviceMemoryCellBirth();
   void FreeDeviceMemoryCellBirth();
   void _manage_device_memoryCellBirth(ManageMemory);
-  void Write_divAngle(unsigned t,unsigned n,unsigned i, bool mutate,double angle);
+  void Write_divAngle(unsigned t,unsigned n,unsigned i, bool mutate,double angle, double plocal, double pcomp, double ptens);
   std::vector<double> compute_eigen(double sxx,double sxy, double syy);
   std::vector<double> stress_criterion();
   void write_cellHist_binary(const std::string &filename,
@@ -621,7 +623,7 @@ enum class ManageMemory {
    * The boolean argument is used to differentiate between the predictor step
    * (true) and subsequent corrector steps.
    * */
-  void Update(bool, unsigned t);
+  void Update(bool, bool, unsigned t);
 
   // ===========================================================================
   // Serialization

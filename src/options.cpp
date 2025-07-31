@@ -262,12 +262,11 @@ void Model::ParseProgramOptions(int ac, char **av)
   
   nphases = nphases_init;
   nphases_index_head = nphases-1;
-  GlobalCellIndex = nphases-1;
+  // GlobalCellIndex = nphases-1;
   
-  // tmean *= nsubsteps*2;
-  tcorr *= nsubsteps*npc;
-  // prolif_freq *= nsubsteps*npc;
-  // prolif_start *= nsubsteps*npc;
+  tcorr *= nsubsteps;
+  prolif_freq_mean *= nsubsteps * npc;
+  prolif_start *= nsubsteps * npc;
 
   // set nstart to the next correct frame (round above)
   if(nstart%ninfo) nstart = (1u+nstart/ninfo)*ninfo;
